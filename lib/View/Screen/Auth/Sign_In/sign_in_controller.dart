@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../Forgot_Password/forgot_password_screen.dart';
 
 class SignInController extends GetxController {
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
@@ -36,7 +37,7 @@ class SignInController extends GetxController {
 
   void forgotPassword() {
     // Navigate to Forgot Password Screen
-    print("Navigate to Forgot Password");
+    Get.to(() => ForgotPasswordScreen());
   }
 
   @override
