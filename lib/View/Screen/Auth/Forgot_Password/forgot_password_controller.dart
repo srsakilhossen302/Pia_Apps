@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../Verify_Code/verify_code_screen.dart';
 
 class ForgotPasswordController extends GetxController {
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
@@ -22,7 +23,11 @@ class ForgotPasswordController extends GetxController {
           "Verification code sent to ${emailController.text}",
         );
 
-        // Navigate to OTP Screen (to be implemented later)
+        // Navigate to OTP Screen
+        Get.to(
+          () => VerifyCodeScreen(),
+          arguments: {'email': emailController.text},
+        );
       } catch (e) {
         Get.snackbar("Error", "Something went wrong: $e");
       } finally {

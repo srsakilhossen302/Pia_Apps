@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../Verify_Code/verify_code_screen.dart';
 
 class SignUpController extends GetxController {
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
@@ -40,8 +41,15 @@ class SignUpController extends GetxController {
         // Simulate API call
         await Future.delayed(const Duration(seconds: 2));
 
-        // Navigate to next screen or showing success
-        Get.snackbar("Success", "Account created successfully");
+        // Navigate to VerifyCodeScreen with email
+        Get.to(
+          () => VerifyCodeScreen(),
+          arguments: {'email': emailController.text},
+        );
+        Get.snackbar(
+          "Success",
+          "Account created successfully. Please verify your email.",
+        );
       } catch (e) {
         Get.snackbar("Error", "Something went wrong: $e");
       } finally {

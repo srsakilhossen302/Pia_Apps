@@ -10,4 +10,6 @@ class AppIcons {
   static const String ovulationPhase = "$basePath/Icon (23).png";
   static const String follicularPhase = "$basePath/Icon (24).png";
   static const String lutealPhase = "$basePath/Icon (25).png";
+  static const String passwordsIconsR = "$basePath/Icon (26).png";
+  static const String passwordsIconsL = "$basePath/Icon (27).png";
 }
