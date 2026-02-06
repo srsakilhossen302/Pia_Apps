@@ -39,5 +39,6 @@ class AppRoute {
       name: clientSubscriptionScreen,
       page: () => ClientSubscriptionScreen(),
     ),
+    GetPage(name: clientPaymentScreen, page: () => ClientPaymentScreen()),
   ];
 }
