@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:pia/View/Screen/Client_Section/Health_Setup/period_info_screen.dart';
+import '../../Client_Section/Home/client_home_screen.dart';
 import '../Forgot_Password/forgot_password_screen.dart';
 
 class SignInController extends GetxController {
@@ -27,7 +28,7 @@ class SignInController extends GetxController {
         await Future.delayed(const Duration(seconds: 2));
 
         // Navigate to Home
-        Get.to(() => PeriodInfoScreen());
+        Get.to(() => ClientHomeScreen());
         Get.snackbar("Success", "Logged in successfully");
       } catch (e) {
         Get.snackbar("Error", "Something went wrong: $e");

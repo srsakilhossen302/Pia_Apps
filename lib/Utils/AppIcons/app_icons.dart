@@ -18,4 +18,14 @@ class AppIcons {
   static const String exerciseLevel = "$basePath/Icon (29).png";
   static const String bIRTHDAY = "$basePath/Icon (30).png";
   static const String hEALTHCONDITIONS = "$basePath/Icon (31).png";
+
+  //Home Screen//
+  static const String personIcon = "$basePath/Button.png";
+  static const String arrowForward = "$basePath/Button (1).png";
+  static const String arrowBack = "$basePath/Button (2).png";
+
+  static const String LUTEAL = "$basePath/Container (15).png"; //
+  static const String OVULATION = "$basePath/Container (19).png";
+  static const String FOLLICULAR = "$basePath/Container (17).png";
+  static const String MENSTRUAL = "$basePath/Container (18).png"; //
 }
