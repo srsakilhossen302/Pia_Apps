@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import '../../Health_Setup/Cycle_Length/cycle_length_screen.dart';
 
 class PeriodLengthController extends GetxController {
   var selectedDays = 5.obs; // Default to 5 days
@@ -26,6 +27,9 @@ class PeriodLengthController extends GetxController {
       // Next step would be "Cycle Length" usually.
       // For now, I'll show a snackbar and maybe navigate to Home if no next step defined yet.
       Get.snackbar("Success", "Period length saved successfully");
+
+      // Navigate to Cycle Length Screen (Step 3)
+      Get.to(() => CycleLengthScreen());
 
       // Navigate to next screen - Placeholder
       // Get.to(() => NextScreen());

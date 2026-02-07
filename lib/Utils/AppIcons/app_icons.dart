@@ -28,4 +28,7 @@ class AppIcons {
   static const String OVULATION = "$basePath/Container (19).png";
   static const String FOLLICULAR = "$basePath/Container (17).png";
   static const String MENSTRUAL = "$basePath/Container (18).png"; //
+
+  static const String periodLength =
+      "$basePath/streamline_arrow-curvy-up-down-1.png";
 }
