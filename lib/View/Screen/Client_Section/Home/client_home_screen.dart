@@ -42,31 +42,30 @@ class ClientHomeScreen extends StatelessWidget {
                           letterSpacing: 1.0,
                         ),
                       ),
-                      Container(
-                        width: 40.w,
-                        height: 40.w,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.05),
-                              blurRadius: 10,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: GestureDetector(
+                      // Container(
+                      //   width: 40.w,
+                      //   height: 40.w,
+                      //   decoration: BoxDecoration(
+                      //     color: Colors.white,
+                      //     shape: BoxShape.circle,
+                      //     boxShadow: [
+                      //       BoxShadow(
+                      //         color: Colors.black.withOpacity(0.05),
+                      //         blurRadius: 10,
+                      //         offset: const Offset(0, 2),
+                      //       ),
+                      //     ],
+                      //   ),
+                      //   child:
+                        GestureDetector(
                           onTap: () {
                             Get.toNamed(AppRoute.clientProfileScreen);
                           },
-                          child: Icon(
-                            Icons.person,
-                            color: const Color(0xFFF294A8),
-                            size: 24.sp,
+                          child: Image.asset(
+                            AppIcons.personIcon,
+
                           ),
                         ),
-                      ),
                     ],
                   ),
                 ),
@@ -94,18 +93,12 @@ class ClientHomeScreen extends StatelessWidget {
                         left: 10.w,
                         child: GestureDetector(
                           onTap: controller.previousPage,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Colors.white.withOpacity(0.5),
-                            ),
-                            padding: EdgeInsets.all(8.w),
                             child: Image.asset(
                               AppIcons.arrowBack,
-                              height: 30.h, // Slightly smaller for balance
-                              width: 30.h,
+                              height: 40.h, // Slightly smaller for balance
+                              width: 40.h,
                             ),
-                          ),
+
                         ),
                       ),
 
@@ -114,18 +107,12 @@ class ClientHomeScreen extends StatelessWidget {
                         right: 10.w,
                         child: GestureDetector(
                           onTap: controller.nextPage,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Colors.white.withOpacity(0.5),
-                            ),
-                            padding: EdgeInsets.all(8.w),
                             child: Image.asset(
                               AppIcons.arrowForward,
-                              height: 30.h,
-                              width: 30.h,
+                              height: 40.h,
+                              width: 40.h,
                             ),
-                          ),
+
                         ),
                       ),
 
