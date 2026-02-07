@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:get/get.dart';
 import '../Reset_Password/reset_password_screen.dart';
-import '../../Client_Section/Home/client_home_screen.dart';
+import '../../Health_Setup/Period_Start/period_start_screen.dart';
 
 class VerifyCodeController extends GetxController {
   String email = "";
@@ -59,7 +59,7 @@ class VerifyCodeController extends GetxController {
 
         // Navigate based on source
         if (source == 'sign_up') {
-          Get.offAll(() => const ClientHomeScreen());
+          Get.offAll(() => PeriodStartScreen());
         } else {
           // Default to ResetPasswordScreen for forgot_password or other cases
           Get.to(() => ResetPasswordScreen());
