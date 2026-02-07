@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import '../../Client_Section/Home/client_home_screen.dart';
+import '../Period_Length/period_length_screen.dart';
 
 class PeriodStartController extends GetxController {
   var selectedDate = DateTime.now().obs;
@@ -25,8 +26,8 @@ class PeriodStartController extends GetxController {
       // So this is the destination after OTP. Where to go AFTER this?
       // Probably next step of setup, but for now let's go to ClientHomeScreen or just stay/show success.
       // Assuming flow completes or goes to next step. I'll route to ClientHomeScreen for now or just show success.
-      // "ata screen ar vitore new akta foldar niya ar modhe ar akta new foldar niya digain korba atate akta post api hit hbe"
-      Get.offAll(() => const ClientHomeScreen());
+      // Navigate to Period Length Screen (Step 2)
+      Get.to(() => PeriodLengthScreen());
       Get.snackbar("Success", "Information saved successfully");
     } catch (e) {
       Get.snackbar("Error", "Failed to save data");
