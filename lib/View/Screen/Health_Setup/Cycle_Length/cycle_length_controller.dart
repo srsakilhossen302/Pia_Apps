@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import '../../Health_Setup/Birthday/birthday_screen.dart';
 
 class CycleLengthController extends GetxController {
   var selectedDays = 28.obs; // Default typically around 28 for cycles
@@ -22,6 +23,9 @@ class CycleLengthController extends GetxController {
 
       // Navigate to next screen (Step 4)
       Get.snackbar("Success", "Cycle length saved successfully");
+
+      // Navigate to Birthday Screen (Step 4)
+      Get.to(() => BirthdayScreen());
 
       // Navigate to next screen - Placeholder for Step 4
       // Get.to(() => NextScreen());
