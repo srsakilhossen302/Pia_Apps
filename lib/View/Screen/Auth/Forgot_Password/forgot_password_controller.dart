@@ -26,7 +26,10 @@ class ForgotPasswordController extends GetxController {
         // Navigate to OTP Screen
         Get.to(
           () => VerifyCodeScreen(),
-          arguments: {'email': emailController.text},
+          arguments: {
+            'email': emailController.text,
+            'source': 'forgot_password',
+          },
         );
       } catch (e) {
         Get.snackbar("Error", "Something went wrong: $e");

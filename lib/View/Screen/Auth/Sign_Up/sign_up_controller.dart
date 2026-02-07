@@ -44,7 +44,7 @@ class SignUpController extends GetxController {
         // Navigate to VerifyCodeScreen with email
         Get.to(
           () => VerifyCodeScreen(),
-          arguments: {'email': emailController.text},
+          arguments: {'email': emailController.text, 'source': 'sign_up'},
         );
         Get.snackbar(
           "Success",

@@ -1,9 +1,11 @@
 import 'dart:async';
 import 'package:get/get.dart';
 import '../Reset_Password/reset_password_screen.dart';
+import '../../Client_Section/Home/client_home_screen.dart';
 
 class VerifyCodeController extends GetxController {
   String email = "";
+  String source = "";
   var otp = "".obs;
   var isLoading = false.obs;
   var timerValue = 59.obs;
@@ -15,6 +17,7 @@ class VerifyCodeController extends GetxController {
     // Get arguments if passed, e.g. email
     if (Get.arguments != null) {
       email = Get.arguments['email'] ?? "your@email.com";
+      source = Get.arguments['source'] ?? "";
     } else {
       email = "your@email.com"; // Default for preview
     }
@@ -54,8 +57,13 @@ class VerifyCodeController extends GetxController {
 
         Get.snackbar("Success", "Email verified successfully");
 
-        // Navigate to Reset Password Screen
-        Get.to(() => ResetPasswordScreen());
+        // Navigate based on source
+        if (source == 'sign_up') {
+          Get.offAll(() => const ClientHomeScreen());
+        } else {
+          // Default to ResetPasswordScreen for forgot_password or other cases
+          Get.to(() => ResetPasswordScreen());
+        }
       } catch (e) {
         Get.snackbar("Error", "Invalid OTP");
       } finally {
