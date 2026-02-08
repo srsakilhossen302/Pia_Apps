@@ -31,4 +31,14 @@ class AppIcons {
 
   static const String periodLength =
       "$basePath/streamline_arrow-curvy-up-down-1.png";
+
+  //Dietary Restrictions
+  static const String anydietaryrestrictions = "$basePath/Frame.png";
+
+  static const String vegan = "$basePath/Container (20).png";
+  static const String vegetarian = "$basePath/Container (21).png";
+  static const String dairyFree = "$basePath/Container (22).png";
+  static const String glutenFree = "$basePath/Container (23).png";
+  static const String nutAllergy = "$basePath/Container (24).png";
+  static const String none = "$basePath/Container (25).png";
 }

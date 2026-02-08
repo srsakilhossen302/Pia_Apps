@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../Core/AppRoute/app_route.dart';
 import 'client_profile_controller.dart';
+import '../../Health_Setup/Period_Start/period_start_screen.dart';
 
 class ClientProfileScreen extends StatelessWidget {
   ClientProfileScreen({super.key});
@@ -163,6 +164,9 @@ class ClientProfileScreen extends StatelessWidget {
                     "HEALTH PROFILE",
                     "Step Up Your Health Profile",
                     isAction: true,
+                    onTap: () {
+                      Get.to(() => PeriodStartScreen());
+                    },
                   ),
                   _buildDivider(),
                   // Apple Health Switch

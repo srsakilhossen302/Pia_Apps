@@ -57,6 +57,8 @@ class VerifyCodeController extends GetxController {
 
         Get.snackbar("Success", "Email verified successfully");
 
+        Get.focusScope?.unfocus(); // Unfocus keyboard before navigation
+
         // Navigate based on source
         if (source == 'sign_up') {
           Get.offAll(() => PeriodStartScreen());

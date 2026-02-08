@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import '../../Client_Section/Home/client_home_screen.dart';
 import '../../Health_Setup/Cycle_Length/cycle_length_screen.dart';
 
 class PeriodLengthController extends GetxController {
@@ -45,8 +46,6 @@ class PeriodLengthController extends GetxController {
   }
 
   void skip() {
-    // Navigate to dashboard or next step skipping this
-    // For now assuming skip goes to next step or home
-    // Get.offAll(() => ClientHomeScreen());
+    Get.offAll(() => const ClientHomeScreen());
   }
 }

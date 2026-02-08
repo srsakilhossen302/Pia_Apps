@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../Auth/Sign_In/sign_in_screen.dart';
+
 import '../../Client_Section/Home/client_home_screen.dart';
+import '../Dietary_Restrictions/dietary_restrictions_screen.dart';
 
 class BirthdayController extends GetxController {
   var selectedDate = DateTime.now().obs; // Default to now, or maybe 2000?
@@ -36,8 +37,8 @@ class BirthdayController extends GetxController {
 
       Get.snackbar("Success", "Setup completed successfully!");
 
-      // Navigate to Home Screen
-      Get.offAll(() =>  SignInScreen());
+      // Navigate to Dietary Restrictions Screen
+      Get.to(() => DietaryRestrictionsScreen());
     } catch (e) {
       Get.snackbar("Error", "Failed to save data");
     } finally {
@@ -50,7 +51,7 @@ class BirthdayController extends GetxController {
   }
 
   void skip() {
-    Get.offAll(() =>  SignInScreen());
+    Get.offAll(() => ClientHomeScreen());
   }
 
   @override

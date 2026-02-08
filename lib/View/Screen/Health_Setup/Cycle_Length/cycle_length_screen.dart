@@ -77,7 +77,7 @@ class CycleLengthScreen extends StatelessWidget {
                     ),
                     // Remaining Steps (4) - Light Background
                     Expanded(
-                      flex: 1,
+                      flex: 2,
                       child: Container(
                         height: 4.h,
                         decoration: BoxDecoration(
@@ -95,7 +95,7 @@ class CycleLengthScreen extends StatelessWidget {
                 child: Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    "Step 3 of 4",
+                    "Step 3 of 5",
                     style: GoogleFonts.poppins(
                       fontSize: 12.sp,
                       color: const Color(0xFF6B7280),

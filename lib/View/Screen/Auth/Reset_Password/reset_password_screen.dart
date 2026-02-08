@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:pia/Utils/AppIcons/app_icons.dart';
 import '../../../../Utils/AppColors/app_colors.dart';
-import '../Sign_In/sign_in_screen.dart';
+
 import 'reset_password_controller.dart';
 
 class ResetPasswordScreen extends StatelessWidget {
@@ -188,9 +188,8 @@ class ResetPasswordScreen extends StatelessWidget {
                             () => ElevatedButton(
                               onPressed: controller.isLoading.value
                                   ? null
-                                  : () async {
-                                      await controller.resetPassword();
-                                      Get.offAll(() => SignInScreen());
+                                  : () {
+                                      controller.resetPassword();
                                     },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: const Color(0xFFF09AB1),

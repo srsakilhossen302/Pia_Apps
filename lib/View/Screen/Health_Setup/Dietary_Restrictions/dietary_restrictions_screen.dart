@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:pia/Utils/AppIcons/app_icons.dart';
-import 'package:pia/Utils/AppColors/app_colors.dart';
-import 'birthday_controller.dart';
+import '../../../../Utils/AppColors/app_colors.dart';
+import '../../../../Utils/AppIcons/app_icons.dart';
+import 'dietary_restrictions_controller.dart';
 
-class BirthdayScreen extends StatelessWidget {
-  final BirthdayController controller = Get.put(BirthdayController());
+class DietaryRestrictionsScreen extends StatelessWidget {
+  final DietaryRestrictionsController controller = Get.put(
+    DietaryRestrictionsController(),
+  );
 
-  BirthdayScreen({super.key});
+  DietaryRestrictionsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -60,28 +61,18 @@ class BirthdayScreen extends StatelessWidget {
                 ),
                 SizedBox(height: 20.h),
 
-                // Progress Bar (Step 4 of 4)
+                // Progress Bar (Step 5 of 5)
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 24.w),
                   child: Row(
                     children: [
-                      // Step 4 - Filled Pink (Full Bar)
+                      // Step 5 - Filled Pink (Full Bar)
                       Expanded(
-                        flex: 4,
+                        flex: 5,
                         child: Container(
                           height: 4.h,
                           decoration: BoxDecoration(
                             color: const Color(0xFFF09AB1),
-                            borderRadius: BorderRadius.circular(2.r),
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        flex: 1,
-                        child: Container(
-                          height: 4.h,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
                             borderRadius: BorderRadius.circular(2.r),
                           ),
                         ),
@@ -95,7 +86,7 @@ class BirthdayScreen extends StatelessWidget {
                   child: Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
-                      "Step 4 of 5",
+                      "Step 5 of 5",
                       style: GoogleFonts.poppins(
                         fontSize: 12.sp,
                         color: const Color(0xFF6B7280),
@@ -106,7 +97,7 @@ class BirthdayScreen extends StatelessWidget {
 
                 SizedBox(height: 30.h),
 
-                // Icon Circle (Person Icon)
+                // Illustration
                 Container(
                   width: 80.w,
                   height: 80.h,
@@ -123,8 +114,7 @@ class BirthdayScreen extends StatelessWidget {
                   ),
                   child: Center(
                     child: Image.asset(
-                      AppIcons.bIRTHDAY,
-                      // Using birthay icon as requested or maybe person
+                      AppIcons.anydietaryrestrictions,
                       width: 40.w,
                       height: 40.h,
                       color: const Color(0xFFF09AB1),
@@ -137,7 +127,7 @@ class BirthdayScreen extends StatelessWidget {
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 40.w),
                   child: Text(
-                    "WHEN IS YOUR BIRTHDAY?",
+                    "ANY DIETARY RESTRICTIONS?",
                     textAlign: TextAlign.center,
                     style: GoogleFonts.playfairDisplay(
                       fontSize: 24.sp,
@@ -150,7 +140,7 @@ class BirthdayScreen extends StatelessWidget {
 
                 // Subtitle
                 Text(
-                  "This helps personalize your experience",
+                  "Select all that apply",
                   style: GoogleFonts.poppins(
                     fontSize: 14.sp,
                     color: const Color(0xFF6B7280),
@@ -159,116 +149,97 @@ class BirthdayScreen extends StatelessWidget {
 
                 SizedBox(height: 30.h),
 
-                // Date Picker Card
-                Container(
-                  margin: EdgeInsets.symmetric(horizontal: 24.w),
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 24.w,
-                    vertical: 24.h,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(24.r),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 20,
-                        offset: const Offset(0, 8),
-                      ),
-                    ],
-                  ),
+                // Options List
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 24.w),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        "Date of Birth",
-                        style: GoogleFonts.playfairDisplay(
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.bold,
-                          color: const Color(0xFF4A4A4A),
-                        ),
-                      ),
-                      SizedBox(height: 16.h),
-
-                      // Date Field
-                      GestureDetector(
-                        onTap: () async {
-                          // Using Cuperdino or Material Date Picker?
-                          // Let's use standard Date Picker for now
-                          DateTime? picked = await showDatePicker(
-                            context: context,
-                            initialDate: DateTime(2000),
-                            // Reasonable default
-                            firstDate: DateTime(1950),
-                            lastDate: DateTime.now(),
-                            builder: (context, child) {
-                              return Theme(
-                                data: ThemeData.light().copyWith(
-                                  colorScheme: const ColorScheme.light(
-                                    primary: Color(0xFFF09AB1),
-                                    onPrimary: Colors.white,
-                                    onSurface: Colors.black87,
+                      ...controller.dietaryOptions.map((option) {
+                        return Padding(
+                          padding: EdgeInsets.only(bottom: 16.h),
+                          child: Obx(() {
+                            bool isSelected = controller.selectedRestrictions
+                                .contains(option["id"]);
+                            return GestureDetector(
+                              onTap: () {
+                                controller.toggleRestriction(option["id"]);
+                              },
+                              child: Container(
+                                padding: EdgeInsets.all(16.w),
+                                decoration: BoxDecoration(
+                                  color: isSelected
+                                      ? const Color(0xFFFFF0F5)
+                                      : Colors.white.withOpacity(0.6),
+                                  borderRadius: BorderRadius.circular(16.r),
+                                  border: Border.all(
+                                    color: isSelected
+                                        ? const Color(0xFFF09AB1)
+                                        : const Color(0xFFFFE0E6),
+                                    width: 1.5,
                                   ),
-                                  dialogBackgroundColor: Colors.white,
                                 ),
-                                child: child!,
-                              );
-                            },
-                          );
-                          if (picked != null) {
-                            controller.onDateSelected(picked);
-                          }
-                        },
-                        child: Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 16.w,
-                            vertical: 14.h,
-                          ),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFFFFFF9),
-                            border: Border.all(
-                              color: const Color(0xFFFFE0E6),
-                            ), // Light pink border
-                            borderRadius: BorderRadius.circular(30.r),
-                          ),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: Obx(
-                                  () => Text(
-                                    controller.dateText.value.isNotEmpty
-                                        ? controller.dateText.value
-                                        : "MM/DD/YYYY",
-                                    style: GoogleFonts.playfairDisplay(
-                                      fontSize: 16.sp,
-                                      color:
-                                          controller.dateText.value.isNotEmpty
-                                          ? const Color(0xFF2D3142)
-                                          : const Color(0xFF9CA3AF),
+                                child: Row(
+                                  children: [
+                                    // Icon
+                                    Image.asset(
+                                      option["icon"],
+                                      width: 32.w,
+                                      height: 32.h,
+                                      // If the image is already colored, don't tint it.
+                                      // If it needs to be tinted, uncomment next line.
+                                      // color: const Color(0xFFF09AB1),
                                     ),
-                                  ),
+                                    SizedBox(width: 16.w),
+                                    // Text
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            option["title"],
+                                            style: GoogleFonts.playfairDisplay(
+                                              fontSize: 16.sp,
+                                              fontWeight: FontWeight.w600,
+                                              color: const Color(0xFF4A4A4A),
+                                            ),
+                                          ),
+                                          SizedBox(height: 4.h),
+                                          Text(
+                                            option["subtitle"],
+                                            style: GoogleFonts.poppins(
+                                              fontSize: 12.sp,
+                                              color: const Color(0xFF6B7280),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    // Checkmark for selection visual cue? Or rely on border color?
+                                    // Let's rely on border/bg color change as per typical selectable card.
+                                    // But maybe checkmark is better.
+                                    // The user image shows checkmark for 'None' which is selected.
+                                    if (isSelected)
+                                      Container(
+                                        padding: EdgeInsets.all(4.w),
+                                        decoration: const BoxDecoration(
+                                          color: Colors
+                                              .green, // Checkmark color in image looks green
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: Icon(
+                                          Icons.check,
+                                          color: Colors.white,
+                                          size: 16.sp,
+                                        ),
+                                      ),
+                                  ],
                                 ),
                               ),
-                              Icon(
-                                Icons.calendar_today_outlined,
-                                color: const Color(0xFFF09AB1),
-                                size: 20.sp,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: 24.h),
-
-                      // Disclaimer Text
-                      Text(
-                        "This helps us personalize meal recommendations for your age",
-                        style: GoogleFonts.poppins(
-                          fontSize: 12.sp,
-                          color: const Color(0xFF6B7280),
-                          height: 1.5,
-                        ),
-                      ),
+                            );
+                          }),
+                        );
+                      }),
                     ],
                   ),
                 ),
@@ -338,7 +309,7 @@ class BirthdayScreen extends StatelessWidget {
                                           MainAxisAlignment.center,
                                       children: [
                                         Text(
-                                          "Continue",
+                                          "Complete Setup",
                                           style: GoogleFonts.playfairDisplay(
                                             fontSize: 16.sp,
                                             fontWeight: FontWeight.w500,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../Sign_In/sign_in_screen.dart';
 
 class ResetPasswordController extends GetxController {
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
@@ -22,6 +23,7 @@ class ResetPasswordController extends GetxController {
 
   Future<void> resetPassword() async {
     if (formKey.currentState!.validate()) {
+      Get.focusScope?.unfocus(); // Unfocus to prevent render errors
       if (newPasswordController.text != confirmPasswordController.text) {
         Get.snackbar("Error", "Passwords do not match");
         return;
@@ -40,8 +42,7 @@ class ResetPasswordController extends GetxController {
         Get.snackbar("Success", "Password reset successfully");
 
         // Navigate to Sign In
-        // Get.offAll(() => SignInScreen());
-        // We will need to import SignInScreen later or use named routes
+        Get.offAll(() => SignInScreen());
       } catch (e) {
         Get.snackbar("Error", "Something went wrong: $e");
       } finally {
@@ -52,8 +53,8 @@ class ResetPasswordController extends GetxController {
 
   @override
   void onClose() {
-    newPasswordController.dispose();
-    confirmPasswordController.dispose();
+    // newPasswordController.dispose();
+    // confirmPasswordController.dispose();
     super.onClose();
   }
 }

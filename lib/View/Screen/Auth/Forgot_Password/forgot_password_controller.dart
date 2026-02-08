@@ -10,6 +10,7 @@ class ForgotPasswordController extends GetxController {
 
   Future<void> sendVerificationCode() async {
     if (formKey.currentState!.validate()) {
+      Get.focusScope?.unfocus(); // Unfocus keyboard
       isLoading.value = true;
       try {
         // TODO: Implement Forgot Password API logic here
@@ -45,7 +46,7 @@ class ForgotPasswordController extends GetxController {
 
   @override
   void onClose() {
-    emailController.dispose();
+    // emailController.dispose();
     super.onClose();
   }
 }

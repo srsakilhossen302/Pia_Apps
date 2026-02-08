@@ -57,15 +57,12 @@ class ClientHomeScreen extends StatelessWidget {
                       //     ],
                       //   ),
                       //   child:
-                        GestureDetector(
-                          onTap: () {
-                            Get.toNamed(AppRoute.clientProfileScreen);
-                          },
-                          child: Image.asset(
-                            AppIcons.personIcon,
-
-                          ),
-                        ),
+                      GestureDetector(
+                        onTap: () {
+                          Get.toNamed(AppRoute.clientProfileScreen);
+                        },
+                        child: Image.asset(AppIcons.personIcon),
+                      ),
                     ],
                   ),
                 ),
@@ -74,7 +71,7 @@ class ClientHomeScreen extends StatelessWidget {
 
                 // === Phase Card Carousel ===
                 SizedBox(
-                  height: 250.h,
+                  height: 177.h,
                   child: Stack(
                     alignment: Alignment.center,
                     children: [
@@ -93,12 +90,11 @@ class ClientHomeScreen extends StatelessWidget {
                         left: 10.w,
                         child: GestureDetector(
                           onTap: controller.previousPage,
-                            child: Image.asset(
-                              AppIcons.arrowBack,
-                              height: 40.h, // Slightly smaller for balance
-                              width: 40.h,
-                            ),
-
+                          child: Image.asset(
+                            AppIcons.arrowBack,
+                            height: 40.h, // Slightly smaller for balance
+                            width: 40.h,
+                          ),
                         ),
                       ),
 
@@ -107,12 +103,11 @@ class ClientHomeScreen extends StatelessWidget {
                         right: 10.w,
                         child: GestureDetector(
                           onTap: controller.nextPage,
-                            child: Image.asset(
-                              AppIcons.arrowForward,
-                              height: 40.h,
-                              width: 40.h,
-                            ),
-
+                          child: Image.asset(
+                            AppIcons.arrowForward,
+                            height: 40.h,
+                            width: 40.h,
+                          ),
                         ),
                       ),
 
@@ -217,7 +212,7 @@ class ClientHomeScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Image.asset(phase.icon, height: 50.h, width: 50.w),
-              SizedBox(width: 12.w),
+              SizedBox(width: 9.w),
               Text(
                 phase.title,
                 style: GoogleFonts.playfairDisplay(

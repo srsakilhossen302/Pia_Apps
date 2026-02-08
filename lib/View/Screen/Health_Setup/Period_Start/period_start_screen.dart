@@ -76,7 +76,7 @@ class PeriodStartScreen extends StatelessWidget {
                     ),
                     // Remaining Steps - Light Background
                     Expanded(
-                      flex: 3,
+                      flex: 4,
                       child: Container(
                         height: 4.h,
                         decoration: BoxDecoration(
@@ -94,7 +94,7 @@ class PeriodStartScreen extends StatelessWidget {
                 child: Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    "Step 1 of 4",
+                    "Step 1 of 5",
                     style: GoogleFonts.poppins(
                       fontSize: 12.sp,
                       color: const Color(0xFF6B7280),

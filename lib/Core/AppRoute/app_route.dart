@@ -1,4 +1,5 @@
 import 'package:get/get_navigation/src/routes/get_route.dart';
+import 'package:pia/View/Screen/Client_Section/Health_Setup/period_info_screen.dart';
 
 import '../../View/Screen/Client_Section/Home/client_home_screen.dart';
 import '../../View/Screen/Client_Section/Calendar/client_calendar_screen.dart';
@@ -22,6 +23,7 @@ class AppRoute {
   static const String clientEditProfileScreen = "/clientEditProfileScreen";
   static const String clientSubscriptionScreen = "/clientSubscriptionScreen";
   static const String clientPaymentScreen = "/clientPaymentScreen";
+  static const String periodInfoScreen = "/periodInfoScreen";
 
   static List<GetPage> routes = [
     ///==================== Authentication  Routes ====================///
@@ -31,6 +33,7 @@ class AppRoute {
     GetPage(name: clientFavoritesScreen, page: () => ClientFavoritesScreen()),
     GetPage(name: clientGroceryScreen, page: () => ClientGroceryScreen()),
     GetPage(name: clientProfileScreen, page: () => ClientProfileScreen()),
+    GetPage(name: periodInfoScreen, page: () => PeriodInfoScreen()),
     GetPage(
       name: clientEditProfileScreen,
       page: () => ClientEditProfileScreen(),

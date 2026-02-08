@@ -49,67 +49,69 @@ class OnboardingScreen extends StatelessWidget {
                 itemCount: controller.onboardingData.length,
                 onPageChanged: controller.onPageChanged,
                 itemBuilder: (context, index) {
-                  return Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      // Icon Circle
-                      Container(
-                        width: 150.w,
-                        height: 150.h,
-                        decoration: const BoxDecoration(
-                          color: Color(0xffF7D6DF),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Center(
-                          child: Image.asset(
-                            controller.onboardingData[index]["icon"]!,
-                            width: 60.w,
-                            height: 60.h,
-                            fit: BoxFit.contain,
+                  return SingleChildScrollView(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        // Icon Circle
+                        Container(
+                          width: 150.w,
+                          height: 150.h,
+                          decoration: const BoxDecoration(
+                            color: Color(0xffF7D6DF),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Center(
+                            child: Image.asset(
+                              controller.onboardingData[index]["icon"]!,
+                              width: 60.w,
+                              height: 60.h,
+                              fit: BoxFit.contain,
+                            ),
                           ),
                         ),
-                      ),
-                      SizedBox(height: 40.h),
-
-                      // Subtitle
-                      Text(
-                        controller.onboardingData[index]["subtitle"]!,
-                        style: GoogleFonts.poppins(
-                          color: const Color(
-                            0xFFF395A9,
-                          ), // Using red400ish color
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.w500,
-                          letterSpacing: 1.2,
+                        SizedBox(height: 40.h),
+                    
+                        // Subtitle
+                        Text(
+                          controller.onboardingData[index]["subtitle"]!,
+                          style: GoogleFonts.poppins(
+                            color: const Color(
+                              0xFFF395A9,
+                            ), // Using red400ish color
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w500,
+                            letterSpacing: 1.2,
+                          ),
                         ),
-                      ),
-                      SizedBox(height: 10.h),
-
-                      // Title
-                      Text(
-                        controller.onboardingData[index]["title"]!,
-                        textAlign: TextAlign.center,
-                        style: GoogleFonts.playfairDisplay(
-                          // Serif font
-                          color: const Color(0xFFF294A8), // Same accent pink
-                          fontSize: 36.sp,
-                          fontWeight: FontWeight.w400,
+                        SizedBox(height: 10.h),
+                    
+                        // Title
+                        Text(
+                          controller.onboardingData[index]["title"]!,
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.playfairDisplay(
+                            // Serif font
+                            color: const Color(0xFFF294A8), // Same accent pink
+                            fontSize: 36.sp,
+                            fontWeight: FontWeight.w400,
+                          ),
                         ),
-                      ),
-                      SizedBox(height: 20.h),
-
-                      // Description
-                      Text(
-                        controller.onboardingData[index]["description"]!,
-                        textAlign: TextAlign.center,
-                        style: GoogleFonts.poppins(
-                          color: const Color(0xFF364153), // black400
-                          fontSize: 18.sp,
-                          fontWeight: FontWeight.w400,
-                          //height: 1.2,
+                        SizedBox(height: 20.h),
+                    
+                        // Description
+                        Text(
+                          controller.onboardingData[index]["description"]!,
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.poppins(
+                            color: const Color(0xFF364153), // black400
+                            fontSize: 18.sp,
+                            fontWeight: FontWeight.w400,
+                            //height: 1.2,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   );
                 },
               ),
