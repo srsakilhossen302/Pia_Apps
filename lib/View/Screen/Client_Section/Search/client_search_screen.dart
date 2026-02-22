@@ -17,6 +17,7 @@ class ClientSearchScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFFFF3F4), // Light pink background
       body: Stack(
+        fit: StackFit.expand,
         children: [
           // Main Content
           SafeArea(

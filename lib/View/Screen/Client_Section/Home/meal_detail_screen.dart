@@ -309,7 +309,9 @@ class MealDetailScreen extends StatelessWidget {
                         margin: EdgeInsets.symmetric(horizontal: 20.w),
                         padding: EdgeInsets.all(24.w),
                         decoration: BoxDecoration(
-                          color: const Color(0xffFFF8F6) ,// Slightly lighter soft pink
+                          color: const Color(
+                            0xffFFF8F6,
+                          ), // Slightly lighter soft pink
                           borderRadius: BorderRadius.circular(20.r),
                         ),
                         child: Column(
