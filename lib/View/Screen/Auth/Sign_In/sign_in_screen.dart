@@ -113,20 +113,45 @@ class SignInScreen extends StatelessWidget {
                         ),
                         SizedBox(height: 12.h),
 
-                        // Forgot Password
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: GestureDetector(
-                            onTap: controller.forgotPassword,
-                            child: Text(
-                              "Forgot password?",
-                              style: GoogleFonts.poppins(
-                                color: const Color(0xFFF09AB1),
-                                fontSize: 12.sp,
-                                fontWeight: FontWeight.w400,
+                        // Remember Me & Forgot Password
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              children: [
+                                Obx(
+                                  () => Checkbox(
+                                    value: controller.isRememberMe.value,
+                                    onChanged: (value) {
+                                      controller.toggleRememberMe();
+                                    },
+                                    activeColor: const Color(0xFFF09AB1),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(4.r),
+                                    ),
+                                  ),
+                                ),
+                                Text(
+                                  "Remember Me",
+                                  style: GoogleFonts.poppins(
+                                    color: const Color(0xFF6B7280),
+                                    fontSize: 12.sp,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            GestureDetector(
+                              onTap: controller.forgotPassword,
+                              child: Text(
+                                "Forgot password?",
+                                style: GoogleFonts.poppins(
+                                  color: const Color(0xFFF09AB1),
+                                  fontSize: 12.sp,
+                                  fontWeight: FontWeight.w400,
+                                ),
                               ),
                             ),
-                          ),
+                          ],
                         ),
                         SizedBox(height: 24.h),
 

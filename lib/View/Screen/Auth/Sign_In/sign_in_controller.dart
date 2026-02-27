@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../../helper/shared_prefe/shared_prefe.dart';
+import '../../../../helper/toast_helper.dart';
+import '../../../../service/api_url.dart';
 import '../../Client_Section/Home/client_home_screen.dart';
 import '../Forgot_Password/forgot_password_screen.dart';
 
@@ -10,31 +13,59 @@ class SignInController extends GetxController {
   final TextEditingController passwordController = TextEditingController();
 
   var isPasswordVisible = false.obs;
+  var isRememberMe = false.obs;
   var isLoading = false.obs;
 
   void togglePasswordVisibility() {
     isPasswordVisible.value = !isPasswordVisible.value;
   }
 
+  void toggleRememberMe() {
+    isRememberMe.value = !isRememberMe.value;
+  }
+
   Future<void> signIn() async {
     if (formKey.currentState!.validate()) {
-      // Unfocus keyboard to prevent "attached not true" errors
       Get.focusScope?.unfocus();
 
       isLoading.value = true;
+      update();
+
       try {
-        print("SignIn Logic: Email: ${emailController.text}");
+        final body = {
+          "email": emailController.text.trim(),
+          "password": passwordController.text.trim(),
+          "rememberMe": isRememberMe.value,
+        };
 
-        // Simulate API call
-        await Future.delayed(const Duration(seconds: 2));
+        final response = await GetConnect().post(
+          "${ApiConstant.baseUrl}${ApiConstant.login}",
+          body,
+        );
 
-        // Navigate to Home
-        Get.offAll(() => ClientHomeScreen());
-        Get.snackbar("Success", "Logged in successfully");
+        if (response.statusCode == 200 || response.statusCode == 201) {
+          final data = response.body['data'];
+          final accessToken = data['accessToken'];
+
+          // Save token
+          await SharePrefsHelper.setString(
+            SharedPreferenceValue.token,
+            accessToken,
+          );
+
+          ToastHelper.showSuccess(
+            response.body['message'] ?? "Logged in successfully",
+          );
+          Get.offAll(() => ClientHomeScreen());
+        } else {
+          String errorMsg = response.body['message'] ?? "Login failed";
+          ToastHelper.showError(errorMsg);
+        }
       } catch (e) {
-        Get.snackbar("", "Something went wrong: $e");
+        ToastHelper.showError("Network error. Please try again.");
       } finally {
         isLoading.value = false;
+        update();
       }
     }
   }
