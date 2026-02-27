@@ -2,6 +2,9 @@ import 'dart:async';
 import 'package:get/get.dart';
 import '../Reset_Password/reset_password_screen.dart';
 import '../../Health_Setup/Period_Start/period_start_screen.dart';
+import '../../../../helper/shared_prefe/shared_prefe.dart';
+import '../../../../helper/toast_helper.dart';
+import '../../../../service/api_url.dart';
 
 class VerifyCodeController extends GetxController {
   String email = "";
@@ -48,31 +51,52 @@ class VerifyCodeController extends GetxController {
   Future<void> verifyCode() async {
     if (otp.value.length == 6) {
       isLoading.value = true;
+      update();
       try {
-        // TODO: Implement Verify OTP API logic here
-        print("Verify Logic: OTP: ${otp.value}");
+        final body = {"email": email, "oneTimeCode": otp.value};
 
-        // Simulate API call
-        await Future.delayed(const Duration(seconds: 2));
+        final response = await GetConnect().post(
+          "${ApiConstant.baseUrl}${ApiConstant.verifyAccount}",
+          body,
+        );
 
-        Get.snackbar("Success", "Email verified successfully");
+        if (response.statusCode == 200 || response.statusCode == 201) {
+          final data = response.body['data'];
+          final accessToken = data['accessToken'];
+          final refreshToken = data['refreshToken'];
 
-        Get.focusScope?.unfocus(); // Unfocus keyboard before navigation
+          // Save tokens to SharedPreferences
+          await SharePrefsHelper.setString(
+            SharedPreferenceValue.token,
+            accessToken,
+          );
+          // Optional: handle refreshToken if needed
 
-        // Navigate based on source
-        if (source == 'sign_up') {
-          Get.offAll(() => PeriodStartScreen());
+          ToastHelper.showSuccess(
+            response.body['message'] ?? "Email verified successfully",
+          );
+
+          Get.focusScope?.unfocus();
+
+          // Navigate based on source
+          if (source == 'sign_up') {
+            Get.offAll(() => PeriodStartScreen());
+          } else {
+            Get.to(() => ResetPasswordScreen());
+          }
         } else {
-          // Default to ResetPasswordScreen for forgot_password or other cases
-          Get.to(() => ResetPasswordScreen());
+          ToastHelper.showError(
+            response.body['message'] ?? "Verification failed",
+          );
         }
       } catch (e) {
-        Get.snackbar("Error", "Invalid OTP");
+        ToastHelper.showError("Network error. Please try again.");
       } finally {
         isLoading.value = false;
+        update();
       }
     } else {
-      Get.snackbar("Error", "Please enter a valid 6-digit code");
+      ToastHelper.showError("Please enter a valid 6-digit code");
     }
   }
 

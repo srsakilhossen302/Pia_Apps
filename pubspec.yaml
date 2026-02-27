@@ -41,6 +41,7 @@ dependencies:
   pin_code_fields: ^8.0.1
   glassmorphism: ^3.0.0
   glass_kit: ^2.0.0
+  intl_phone_field: ^3.2.0
 
 dev_dependencies:
   flutter_test:

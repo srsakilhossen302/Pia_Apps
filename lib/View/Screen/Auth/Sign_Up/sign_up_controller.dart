@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../../helper/toast_helper.dart';
+import '../../../../service/api_url.dart';
 import '../Verify_Code/verify_code_screen.dart';
 
 class SignUpController extends GetxController {
@@ -27,33 +29,43 @@ class SignUpController extends GetxController {
   Future<void> signUp() async {
     if (formKey.currentState!.validate()) {
       if (passwordController.text != confirmPasswordController.text) {
-        Get.snackbar("Error", "Passwords do not match");
+        ToastHelper.showError("Passwords do not match");
         return;
       }
 
       isLoading.value = true;
+      update();
+
       try {
-        // TODO: Implement Post API logic here
-        print(
-          "SignUp Logic: Name: ${nameController.text}, Email: ${emailController.text}",
+        final body = {
+          "name": nameController.text.trim(),
+          "email": emailController.text.trim(),
+          "password": passwordController.text.trim(),
+          "role": "user",
+        };
+
+        final response = await GetConnect().post(
+          "${ApiConstant.baseUrl}${ApiConstant.signUp}",
+          body,
         );
 
-        // Simulate API call
-        await Future.delayed(const Duration(seconds: 2));
-
-        // Navigate to VerifyCodeScreen with email
-        Get.to(
-          () => VerifyCodeScreen(),
-          arguments: {'email': emailController.text, 'source': 'sign_up'},
-        );
-        Get.snackbar(
-          "Success",
-          "Account created successfully. Please verify your email.",
-        );
+        if (response.statusCode == 200 || response.statusCode == 201) {
+          Get.to(
+            () => VerifyCodeScreen(),
+            arguments: {'email': emailController.text, 'source': 'sign_up'},
+          );
+          ToastHelper.showSuccess(
+            response.body['message'] ?? "Registration successful!",
+          );
+        } else {
+          String errorMsg = response.body['message'] ?? "Something went wrong";
+          ToastHelper.showError(errorMsg);
+        }
       } catch (e) {
-        Get.snackbar("Error", "Something went wrong: $e");
+        ToastHelper.showError("Network error. Please try again.");
       } finally {
         isLoading.value = false;
+        update();
       }
     }
   }
