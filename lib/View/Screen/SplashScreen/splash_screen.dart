@@ -7,6 +7,8 @@ import '../../../Utils/AppColors/app_colors.dart';
 import '../../../Utils/AppIcons/app_icons.dart';
 import '../../../helper/shared_prefe/shared_prefe.dart';
 
+import '../Client_Section/Home/client_home_screen.dart';
+
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -19,13 +21,27 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
     Future.delayed(const Duration(seconds: 3), () async {
-      bool isOnboardingCompleted =
-          await SharePrefsHelper.getBool(SharedPreferenceValue.isOnboarding) ??
-          false;
-      if (isOnboardingCompleted) {
-        Get.offAll(() => SignInScreen());
+      // Check for token first (Session Persistence)
+      String token = await SharePrefsHelper.getString(
+        SharedPreferenceValue.token,
+      );
+
+      if (token.isNotEmpty) {
+        // User is already logged in
+        Get.offAll(() => ClientHomeScreen());
       } else {
-        Get.offAll(() => OnboardingScreen());
+        // Not logged in, check onboarding
+        bool isOnboardingCompleted =
+            await SharePrefsHelper.getBool(
+              SharedPreferenceValue.isOnboarding,
+            ) ??
+            false;
+
+        if (isOnboardingCompleted) {
+          Get.offAll(() => SignInScreen());
+        } else {
+          Get.offAll(() => OnboardingScreen());
+        }
       }
     });
   }
