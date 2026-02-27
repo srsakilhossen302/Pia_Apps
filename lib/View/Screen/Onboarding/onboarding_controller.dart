@@ -1,7 +1,8 @@
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import '../../../../Utils/AppIcons/app_icons.dart';
-import '../Auth/Sign_Up/sign_up_screen.dart';
+import '../Auth/Sign_In/sign_in_screen.dart';
+import '../../../../helper/shared_prefe/shared_prefe.dart';
 
 class OnboardingController extends GetxController {
   var currentIndex = 0.obs;
@@ -49,13 +50,17 @@ class OnboardingController extends GetxController {
         curve: Curves.easeIn,
       );
     } else {
-      // Navigate to next screen, e.g., Login or Home
-      Get.offAll(() => SignUpScreen());
+      // Save onboarding completion status
+      SharePrefsHelper.setBool(SharedPreferenceValue.isOnboarding, true);
+      // Navigate to Sign In screen
+      Get.offAll(() => SignInScreen());
     }
   }
 
   void skip() {
-    // Navigate to next screen directly
-    Get.offAll(() => SignUpScreen());
+    // Save onboarding completion status
+    SharePrefsHelper.setBool(SharedPreferenceValue.isOnboarding, true);
+    // Navigate to Sign In screen directly
+    Get.offAll(() => SignInScreen());
   }
 }

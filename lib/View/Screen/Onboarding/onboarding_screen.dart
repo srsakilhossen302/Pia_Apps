@@ -71,7 +71,7 @@ class OnboardingScreen extends StatelessWidget {
                           ),
                         ),
                         SizedBox(height: 40.h),
-                    
+
                         // Subtitle
                         Text(
                           controller.onboardingData[index]["subtitle"]!,
@@ -85,7 +85,7 @@ class OnboardingScreen extends StatelessWidget {
                           ),
                         ),
                         SizedBox(height: 10.h),
-                    
+
                         // Title
                         Text(
                           controller.onboardingData[index]["title"]!,
@@ -98,7 +98,7 @@ class OnboardingScreen extends StatelessWidget {
                           ),
                         ),
                         SizedBox(height: 20.h),
-                    
+
                         // Description
                         Text(
                           controller.onboardingData[index]["description"]!,
