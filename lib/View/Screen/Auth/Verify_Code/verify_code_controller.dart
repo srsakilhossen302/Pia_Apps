@@ -39,12 +39,39 @@ class VerifyCodeController extends GetxController {
     });
   }
 
-  void resendCode() {
+  Future<void> resendCode() async {
     if (timerValue.value == 0) {
-      // Logic to resend code
-      print("Resending code to $email");
-      startTimer();
-      Get.snackbar("Sent", "New code sent to your email");
+      isLoading.value = true;
+      update();
+      try {
+        final body = {
+          "email": email.trim(),
+          "authType": source == 'forgot_password' ? 'resetPassword' : 'signup',
+        };
+
+        print("Resend OTP Request Body: $body");
+
+        final response = await GetConnect().post(
+          "${ApiConstant.baseUrl}${ApiConstant.resendOtp}",
+          body,
+        );
+
+        if (response.statusCode == 200 || response.statusCode == 201) {
+          ToastHelper.showSuccess(
+            response.body['message'] ?? "OTP resent successfully",
+          );
+          startTimer();
+        } else {
+          ToastHelper.showError(
+            response.body['message'] ?? "Failed to resend OTP",
+          );
+        }
+      } catch (e) {
+        ToastHelper.showError("Network error. Please try again.");
+      } finally {
+        isLoading.value = false;
+        update();
+      }
     }
   }
 
