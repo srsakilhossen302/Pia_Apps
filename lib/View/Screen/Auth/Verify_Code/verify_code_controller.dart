@@ -53,7 +53,9 @@ class VerifyCodeController extends GetxController {
       isLoading.value = true;
       update();
       try {
-        final body = {"email": email, "oneTimeCode": otp.value};
+        final body = {"email": email.trim(), "oneTimeCode": otp.value.trim()};
+
+        print("Verification Request Body: $body");
 
         final response = await GetConnect().post(
           "${ApiConstant.baseUrl}${ApiConstant.verifyAccount}",
@@ -62,15 +64,21 @@ class VerifyCodeController extends GetxController {
 
         if (response.statusCode == 200 || response.statusCode == 201) {
           final data = response.body['data'];
-          final accessToken = data['accessToken'];
-          final refreshToken = data['refreshToken'];
 
-          // Save tokens to SharedPreferences
-          await SharePrefsHelper.setString(
-            SharedPreferenceValue.token,
-            accessToken,
-          );
-          // Optional: handle refreshToken if needed
+          // Get token (check for 'accessToken' or just 'token' from forgot password response)
+          final String token = data['accessToken'] ?? data['token'] ?? "";
+
+          // Save token and email to SharedPreferences
+          if (token.isNotEmpty) {
+            await SharePrefsHelper.setString(
+              SharedPreferenceValue.token,
+              token,
+            );
+            await SharePrefsHelper.setString(
+              SharedPreferenceValue.email,
+              email.trim(),
+            );
+          }
 
           ToastHelper.showSuccess(
             response.body['message'] ?? "Email verified successfully",

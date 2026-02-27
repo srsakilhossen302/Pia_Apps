@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../../helper/shared_prefe/shared_prefe.dart';
+import '../../../../helper/toast_helper.dart';
+import '../../../../service/api_url.dart';
 import '../Sign_In/sign_in_screen.dart';
 
 class ResetPasswordController extends GetxController {
@@ -23,30 +26,54 @@ class ResetPasswordController extends GetxController {
 
   Future<void> resetPassword() async {
     if (formKey.currentState!.validate()) {
-      Get.focusScope?.unfocus(); // Unfocus to prevent render errors
+      Get.focusScope?.unfocus();
       if (newPasswordController.text != confirmPasswordController.text) {
-        Get.snackbar("Error", "Passwords do not match");
+        ToastHelper.showError("Passwords do not match");
         return;
       }
 
       isLoading.value = true;
+      update();
       try {
-        // TODO: Implement Reset Password API logic here
-        print(
-          "Reset Password Logic: New Pass is ${newPasswordController.text}",
+        final token = await SharePrefsHelper.getString(
+          SharedPreferenceValue.token,
         );
 
-        // Simulate API call
-        await Future.delayed(const Duration(seconds: 2));
+        final body = {
+          "newPassword": newPasswordController.text.trim(),
+          "confirmPassword": confirmPasswordController.text.trim(),
+        };
 
-        Get.snackbar("Success", "Password reset successfully");
+        print(
+          "Reset Password URL: ${ApiConstant.baseUrl}${ApiConstant.resetPassword}",
+        );
+        print("Reset Password Request Body: $body");
+        print("Reset Password Token: $token");
 
-        // Navigate to Sign In
-        Get.offAll(() => SignInScreen());
+        final response = await GetConnect().post(
+          "${ApiConstant.baseUrl}${ApiConstant.resetPassword}",
+          body,
+          headers: {'Authorization': token},
+        );
+
+        print("Response Status Code: ${response.statusCode}");
+        print("Response Body: ${response.body}");
+
+        if (response.statusCode == 200 || response.statusCode == 201) {
+          ToastHelper.showSuccess(
+            response.body['message'] ?? "Password reset successfully!",
+          );
+          Get.offAll(() => SignInScreen());
+        } else {
+          String errorMsg =
+              response.body['message'] ?? "Failed to reset password";
+          ToastHelper.showError(errorMsg);
+        }
       } catch (e) {
-        Get.snackbar("Error", "Something went wrong: $e");
+        ToastHelper.showError("Network error. Please try again.");
       } finally {
         isLoading.value = false;
+        update();
       }
     }
   }

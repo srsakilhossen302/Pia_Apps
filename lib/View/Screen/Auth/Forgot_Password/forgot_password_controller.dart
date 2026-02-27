@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../../helper/toast_helper.dart';
+import '../../../../service/api_url.dart';
 import '../Verify_Code/verify_code_screen.dart';
 
 class ForgotPasswordController extends GetxController {
@@ -10,32 +12,38 @@ class ForgotPasswordController extends GetxController {
 
   Future<void> sendVerificationCode() async {
     if (formKey.currentState!.validate()) {
-      Get.focusScope?.unfocus(); // Unfocus keyboard
+      Get.focusScope?.unfocus();
       isLoading.value = true;
+      update();
       try {
-        // TODO: Implement Forgot Password API logic here
-        print("Forgot Password Logic: Email: ${emailController.text}");
+        final body = {"email": emailController.text.trim()};
 
-        // Simulate API call
-        await Future.delayed(const Duration(seconds: 2));
-
-        Get.snackbar(
-          "Success",
-          "Verification code sent to ${emailController.text}",
+        final response = await GetConnect().post(
+          "${ApiConstant.baseUrl}${ApiConstant.forgetPassword}",
+          body,
         );
 
-        // Navigate to OTP Screen
-        Get.to(
-          () => VerifyCodeScreen(),
-          arguments: {
-            'email': emailController.text,
-            'source': 'forgot_password',
-          },
-        );
+        if (response.statusCode == 200 || response.statusCode == 201) {
+          ToastHelper.showSuccess(
+            response.body['message'] ?? "Verification code sent to your email",
+          );
+
+          Get.to(
+            () => VerifyCodeScreen(),
+            arguments: {
+              'email': emailController.text.trim(),
+              'source': 'forgot_password',
+            },
+          );
+        } else {
+          String errorMsg = response.body['message'] ?? "Failed to send code";
+          ToastHelper.showError(errorMsg);
+        }
       } catch (e) {
-        Get.snackbar("Error", "Something went wrong: $e");
+        ToastHelper.showError("Network error. Please try again.");
       } finally {
         isLoading.value = false;
+        update();
       }
     }
   }

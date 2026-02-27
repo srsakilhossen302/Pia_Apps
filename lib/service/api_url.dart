@@ -8,4 +8,6 @@ class ApiConstant {
   static const String login = "$apiVersion/auth/login";
   static const String signUp = "$apiVersion/auth/signup";
   static const String verifyAccount = "$apiVersion/auth/verify-account";
+  static const String forgetPassword = "$apiVersion/auth/forget-password";
+  static const String resetPassword = "$apiVersion/auth/reset-password";
 }
