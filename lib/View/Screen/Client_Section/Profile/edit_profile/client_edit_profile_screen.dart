@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../../../service/api_url.dart';
 import 'client_edit_profile_controller.dart';
 
 class ClientEditProfileScreen extends StatelessWidget {
@@ -41,161 +42,185 @@ class ClientEditProfileScreen extends StatelessWidget {
           ),
         ),
       ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.symmetric(horizontal: 24.w),
-        child: Column(
-          children: [
-            SizedBox(height: 30.h),
+      body: Obx(() {
+        final user = controller.profileController.userProfile.value;
+        String profileImage = user?.profile != null
+            ? (user!.profile!.startsWith('http')
+                  ? user.profile!
+                  : "${ApiConstant.baseUrl}${user.profile}")
+            : 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=300';
 
-            // === Profile Image ===
-            Center(
-              child: Stack(
-                children: [
-                  Container(
-                    width: 110.w,
-                    height: 110.w,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 3),
-                      image: const DecorationImage(
-                        image: NetworkImage(
-                          'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=300',
-                        ), // Different img for demo
-                        fit: BoxFit.cover,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
-                          blurRadius: 10,
-                          offset: const Offset(0, 5),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Positioned(
-                    bottom: 5.h,
-                    right: 5.w,
-                    child: Container(
-                      padding: EdgeInsets.all(6.w),
-                      decoration: const BoxDecoration(
-                        color: Color(0xFFF48FB1),
+        return SingleChildScrollView(
+          padding: EdgeInsets.symmetric(horizontal: 24.w),
+          child: Column(
+            children: [
+              SizedBox(height: 30.h),
+
+              // === Profile Image ===
+              Center(
+                child: Stack(
+                  children: [
+                    Container(
+                      width: 110.w,
+                      height: 110.w,
+                      decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        Icons.camera_alt,
-                        color: Colors.white,
-                        size: 16.sp,
+                        border: Border.all(color: Colors.white, width: 3),
+                        image: DecorationImage(
+                          image: controller.selectedImage.value != null
+                              ? FileImage(controller.selectedImage.value!)
+                                    as ImageProvider
+                              : NetworkImage(profileImage),
+                          fit: BoxFit.cover,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 10,
+                            offset: const Offset(0, 5),
+                          ),
+                        ],
                       ),
                     ),
-                  ),
-                ],
-              ),
-            ),
-            SizedBox(height: 15.h),
-
-            // === Name & Subtitle ===
-            Text(
-              "Elena Gilbert",
-              style: GoogleFonts.playfairDisplay(
-                fontSize: 22.sp,
-                fontWeight: FontWeight.w700,
-                color: const Color(0xFF2D2D2D),
-              ),
-            ),
-            SizedBox(height: 5.h),
-            Text(
-              "Luteal Phase Enthusiast",
-              style: GoogleFonts.lato(
-                fontSize: 12.sp,
-                color: const Color(0xFFF48FB1),
-              ),
-            ),
-
-            SizedBox(height: 40.h),
-
-            // === Form Fields ===
-            _buildLabel("Full Name"),
-            _buildTextField(controller.nameController, "Full Name"),
-
-            SizedBox(height: 20.h),
-            _buildLabel("Email Address"),
-            _buildTextField(
-              controller.emailController,
-              "Email Address",
-            ), // TODO: Add validator/disabled if intended
-
-            SizedBox(height: 20.h),
-            _buildLabel("Birthday"),
-            _buildTextField(
-              controller.birthdayController,
-              "MM/DD/YYYY",
-              isDate: true,
-              suffixIcon: Icon(
-                Icons.calendar_today_outlined,
-                color: const Color(0xFFF48FB1),
-                size: 20.sp,
-              ),
-            ),
-
-            SizedBox(height: 40.h),
-
-            // === Save Changes Button ===
-            SizedBox(
-              width: double.infinity,
-              height: 50.h,
-              child: ElevatedButton(
-                onPressed: controller.saveChanges,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFF48FB1),
-                  elevation: 0,
-                  shadowColor: const Color(0xFFF48FB1).withOpacity(0.4),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15.r),
-                  ),
-                ),
-                child: Text(
-                  "SAVE CHANGES",
-                  style: GoogleFonts.lato(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                    letterSpacing: 1.0,
-                  ),
+                    Positioned(
+                      bottom: 5.h,
+                      right: 5.w,
+                      child: GestureDetector(
+                        onTap: controller.pickImage,
+                        child: Container(
+                          padding: EdgeInsets.all(6.w),
+                          decoration: const BoxDecoration(
+                            color: Color(0xFFF48FB1),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            Icons.camera_alt,
+                            color: Colors.white,
+                            size: 16.sp,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ),
+              SizedBox(height: 15.h),
 
-            SizedBox(height: 15.h),
-
-            // === Cancel Button ===
-            SizedBox(
-              width: double.infinity,
-              height: 50.h,
-              child: ElevatedButton(
-                onPressed: controller.cancel,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15.r),
-                    // border: Border.all(color: Colors.transparent),
-                  ),
+              // === Name & Subtitle ===
+              Text(
+                user?.name ?? "N/A",
+                style: GoogleFonts.playfairDisplay(
+                  fontSize: 22.sp,
+                  fontWeight: FontWeight.w700,
+                  color: const Color(0xFF2D2D2D),
                 ),
-                child: Text(
-                  "Cancel",
-                  style: GoogleFonts.lato(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.black87,
+              ),
+              SizedBox(height: 5.h),
+              Text(
+                (user?.role ?? "").toUpperCase(),
+                style: GoogleFonts.lato(
+                  fontSize: 12.sp,
+                  color: const Color(0xFFF48FB1),
+                ),
+              ),
+
+              SizedBox(height: 40.h),
+
+              // === Form Fields ===
+              _buildLabel("Full Name"),
+              _buildTextField(controller.nameController, "Full Name"),
+
+              SizedBox(height: 20.h),
+              _buildLabel("Email Address"),
+              _buildTextField(
+                controller.emailController,
+                "Email Address",
+                readOnly: true,
+              ),
+
+              SizedBox(height: 20.h),
+              _buildLabel("Birthday"),
+              _buildTextField(
+                controller.birthdayController,
+                "MM/DD/YYYY",
+                isDate: true,
+                suffixIcon: Icon(
+                  Icons.calendar_today_outlined,
+                  color: const Color(0xFFF48FB1),
+                  size: 20.sp,
+                ),
+              ),
+
+              SizedBox(height: 40.h),
+
+              // === Save Changes Button ===
+              SizedBox(
+                width: double.infinity,
+                height: 50.h,
+                child: ElevatedButton(
+                  onPressed: controller.isLoading.value
+                      ? null
+                      : controller.saveChanges,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFF48FB1),
+                    elevation: 0,
+                    shadowColor: const Color(0xFFF48FB1).withOpacity(0.4),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15.r),
+                    ),
+                  ),
+                  child: controller.isLoading.value
+                      ? SizedBox(
+                          width: 20.w,
+                          height: 20.w,
+                          child: const CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
+                        )
+                      : Text(
+                          "SAVE CHANGES",
+                          style: GoogleFonts.lato(
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                            letterSpacing: 1.0,
+                          ),
+                        ),
+                ),
+              ),
+
+              SizedBox(height: 15.h),
+
+              // === Cancel Button ===
+              SizedBox(
+                width: double.infinity,
+                height: 50.h,
+                child: ElevatedButton(
+                  onPressed: controller.cancel,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15.r),
+                    ),
+                  ),
+                  child: Text(
+                    "Cancel",
+                    style: GoogleFonts.lato(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black87,
+                    ),
                   ),
                 ),
               ),
-            ),
 
-            SizedBox(height: 30.h),
-          ],
-        ),
-      ),
+              SizedBox(height: 30.h),
+            ],
+          ),
+        );
+      }),
     );
   }
 
@@ -206,9 +231,9 @@ class ClientEditProfileScreen extends StatelessWidget {
       child: Text(
         label,
         style: GoogleFonts.playfairDisplay(
-          fontSize: 14.sp,
-          color: Colors.black87,
-          fontWeight: FontWeight.w500,
+          fontSize: 15.sp,
+          color: const Color(0xFF2D2D2D),
+          fontWeight: FontWeight.w600,
         ),
       ),
     );
@@ -218,41 +243,44 @@ class ClientEditProfileScreen extends StatelessWidget {
     TextEditingController controller,
     String hint, {
     bool isDate = false,
+    bool readOnly = false,
     Widget? suffixIcon,
   }) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(15.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.01),
-            blurRadius: 5,
-            offset: const Offset(0, 2),
-          ),
-        ],
       ),
       child: TextField(
         controller: controller,
-        readOnly: isDate,
+        readOnly: isDate || readOnly,
         style: GoogleFonts.playfairDisplay(
-          color: const Color(
-            0xFF8A9EA8,
-          ), // Color matching typical placeholder/filled text in image
-          fontSize: 14.sp,
+          color: const Color(0xFF8A9EA8),
+          fontSize: 16.sp,
         ),
         decoration: InputDecoration(
           hintText: hint,
           hintStyle: GoogleFonts.playfairDisplay(
-            color: Colors.grey[400],
-            fontSize: 14.sp,
+            color: const Color(0xFF8A9EA8).withOpacity(0.6),
+            fontSize: 16.sp,
           ),
           suffixIcon: suffixIcon,
           contentPadding: EdgeInsets.symmetric(
             horizontal: 20.w,
-            vertical: 15.h,
+            vertical: 18.h,
           ),
-          border: InputBorder.none,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(15.r),
+            borderSide: BorderSide.none,
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(15.r),
+            borderSide: BorderSide.none,
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(15.r),
+            borderSide: BorderSide.none,
+          ),
         ),
       ),
     );
