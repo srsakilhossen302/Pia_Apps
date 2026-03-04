@@ -16,12 +16,6 @@ class PeriodInfoController extends GetxController {
   // Model instance
   var periodInfo = PeriodInfoModel().obs;
 
-  @override
-  void onInit() {
-    super.onInit();
-    // Initialize date controller if needed specific format
-  }
-
   void updateDate(DateTime date) {
     periodInfo.update((val) {
       val?.lastPeriodDate = date;

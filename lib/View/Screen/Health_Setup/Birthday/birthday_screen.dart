@@ -209,7 +209,9 @@ class BirthdayScreen extends StatelessWidget {
                                     onPrimary: Colors.white,
                                     onSurface: Colors.black87,
                                   ),
-                                  dialogBackgroundColor: Colors.white,
+                                  dialogTheme: DialogThemeData(
+                                    backgroundColor: Colors.white,
+                                  ),
                                 ),
                                 child: child!,
                               );

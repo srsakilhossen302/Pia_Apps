@@ -488,7 +488,7 @@ class MealDetailScreen extends StatelessWidget {
                                   ),
                                 ),
                               );
-                            }).toList(),
+                            }),
                           ],
                         ),
                       ),
@@ -550,7 +550,7 @@ class MealDetailScreen extends StatelessWidget {
                                   ],
                                 ),
                               );
-                            }).toList(),
+                            }),
                           ],
                         ),
                       ),

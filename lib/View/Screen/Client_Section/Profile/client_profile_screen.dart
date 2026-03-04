@@ -212,7 +212,7 @@ class ClientProfileScreen extends StatelessWidget {
                         () => Switch(
                           value: controller.isHealthSyncEnabled.value,
                           onChanged: controller.toggleHealthSync,
-                          activeColor: Colors.white,
+                          activeThumbColor: Colors.white,
                           activeTrackColor: const Color(0xFFF48FB1),
                         ),
                       ),

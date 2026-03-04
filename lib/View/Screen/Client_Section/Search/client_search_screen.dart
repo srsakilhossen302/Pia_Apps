@@ -117,8 +117,9 @@ class ClientSearchScreen extends StatelessWidget {
 
                   // === Expandable Filter Section ===
                   Obx(() {
-                    if (!controller.isFilterVisible.value)
+                    if (!controller.isFilterVisible.value) {
                       return const SizedBox.shrink();
+                    }
 
                     return Container(
                       margin: EdgeInsets.only(

@@ -3,6 +3,10 @@ import 'package:get/get.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:pia/Model/Client_Section/meal_model.dart';
 import 'package:pia/Utils/AppIcons/app_icons.dart';
+import '../../../../Model/Client_Section/recipe_model.dart';
+import '../../../../helper/shared_prefe/shared_prefe.dart';
+import '../../../../helper/toast_helper.dart';
+import '../../../../service/api_url.dart';
 
 class ClientPhaseModel {
   final String title;
@@ -23,6 +27,9 @@ class ClientHomeController extends GetxController {
   // Flag to toggle between Complete (New Design) and Incomplete (Old Design) views
   final RxBool isProfileComplete = false.obs;
   late PageController pageController;
+
+  final RxList<RecipeModel> recipeList = <RecipeModel>[].obs;
+  final RxBool isLoadingRecipe = false.obs;
 
   final List<ClientPhaseModel> phases = [
     ClientPhaseModel(
@@ -197,6 +204,38 @@ class ClientHomeController extends GetxController {
   void onInit() {
     super.onInit();
     pageController = PageController(viewportFraction: 1.0);
+    getRecipes();
+  }
+
+  Future<void> getRecipes() async {
+    isLoadingRecipe.value = true;
+    update();
+    try {
+      final token = await SharePrefsHelper.getString(
+        SharedPreferenceValue.token,
+      );
+      final response = await GetConnect().get(
+        "${ApiConstant.baseUrl}${ApiConstant.recipe}",
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final recipeResponse = RecipeResponseModel.fromJson(response.body);
+        recipeList.assignAll(recipeResponse.data ?? []);
+      } else {
+        ToastHelper.showError(
+          response.body['message'] ?? "Failed to load recipes",
+        );
+      }
+    } catch (e) {
+      ToastHelper.showError("Network error: $e");
+    } finally {
+      isLoadingRecipe.value = false;
+      update();
+    }
   }
 
   @override

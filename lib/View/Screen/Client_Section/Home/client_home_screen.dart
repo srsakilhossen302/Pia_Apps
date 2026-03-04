@@ -4,12 +4,13 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../../../../Model/Client_Section/meal_model.dart';
+import '../../../../Model/Client_Section/recipe_model.dart';
 import '../../../../Utils/AppIcons/app_icons.dart';
 import '../../../../Core/AppRoute/app_route.dart';
+import '../../../../service/api_url.dart';
 import '../../../Widgets/custom_bottom_nav_bar.dart';
 import 'client_home_controller.dart';
-import 'meal_detail_screen.dart';
+import 'recipe_detail_screen.dart';
 
 class ClientHomeScreen extends StatelessWidget {
   const ClientHomeScreen({super.key});
@@ -154,35 +155,43 @@ class ClientHomeScreen extends StatelessWidget {
                 // === Meal Categories Section ===
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 20.w),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildMealCategory(
-                        "BREAKFAST",
-                        controller.meals.isNotEmpty
-                            ? controller.meals[0]
-                            : null,
-                      ),
-                      _buildMealCategory(
-                        "LUNCH",
-                        controller.meals.length > 1
-                            ? controller.meals[1]
-                            : null,
-                      ),
-                      _buildMealCategory(
-                        "SNACKS",
-                        controller.meals.length > 2
-                            ? controller.meals[2]
-                            : null,
-                      ),
-                      _buildMealCategory(
-                        "DESSERT",
-                        controller.meals.length > 3
-                            ? controller.meals[3]
-                            : null,
-                      ),
-                    ],
-                  ),
+                  child: Obx(() {
+                    if (controller.isLoadingRecipe.value) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    if (controller.recipeList.isEmpty) {
+                      return const Center(child: Text("No recipes found"));
+                    }
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildRecipeCategory(
+                          "BREAKFAST",
+                          controller.recipeList.firstWhereOrNull(
+                            (r) => r.category?.toUpperCase() == "BREAKFAST",
+                          ),
+                        ),
+                        _buildRecipeCategory(
+                          "LUNCH",
+                          controller.recipeList.firstWhereOrNull(
+                            (r) => r.category?.toUpperCase() == "LUNCH",
+                          ),
+                        ),
+                        _buildRecipeCategory(
+                          "SNACKS",
+                          controller.recipeList.firstWhereOrNull(
+                            (r) => r.category?.toUpperCase() == "SNACKS",
+                          ),
+                        ),
+                        _buildRecipeCategory(
+                          "DESSERT",
+                          controller.recipeList.firstWhereOrNull(
+                            (r) => r.category?.toUpperCase() == "DESSERT",
+                          ),
+                        ),
+                      ],
+                    );
+                  }),
                 ),
                 SizedBox(height: 200.h), // Bottom padding for navbar
               ],
@@ -241,8 +250,8 @@ class ClientHomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMealCategory(String title, MealModel? meal) {
-    if (meal == null) return const SizedBox.shrink();
+  Widget _buildRecipeCategory(String title, RecipeModel? recipe) {
+    if (recipe == null) return const SizedBox.shrink();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -258,7 +267,7 @@ class ClientHomeScreen extends StatelessWidget {
         SizedBox(height: 15.h),
         GestureDetector(
           onTap: () {
-            Get.to(() => MealDetailScreen(meal: meal));
+            Get.to(() => RecipeDetailScreen(recipe: recipe));
           },
           child: Container(
             margin: EdgeInsets.only(bottom: 25.h),
@@ -286,7 +295,11 @@ class ClientHomeScreen extends StatelessWidget {
                         top: Radius.circular(24.r),
                       ),
                       child: Image.network(
-                        meal.imageUrl,
+                        recipe.image != null
+                            ? (recipe.image!.startsWith('http')
+                                  ? recipe.image!
+                                  : "${ApiConstant.baseUrl}${recipe.image}")
+                            : 'https://via.placeholder.com/400',
                         height: 200.h, // Slightly taller as per image visual
                         width: double.infinity,
                         fit: BoxFit.cover,
@@ -294,39 +307,10 @@ class ClientHomeScreen extends StatelessWidget {
                           height: 200.h,
                           width: double.infinity,
                           color: Colors.grey[200],
-                          child: Icon(Icons.broken_image, color: Colors.grey),
-                        ),
-                      ),
-                    ),
-                    // Badges (Top Left) - Single Pill
-                    Positioned(
-                      top: 15.h,
-                      left: 15.w,
-                      child: Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 12.w,
-                          vertical: 6.h,
-                        ),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF294A8), // Stronger pink
-                          borderRadius: BorderRadius.circular(20.r),
-                        ),
-                        child: Row(
-                          children: [
-                            // Spade/Leaf icon (IconData not exact match in standard set, using spa)
-                            Icon(
-                              Icons.spa_rounded,
-                              size: 14.sp,
-                              color: Colors
-                                  .black87, // Dark icon on pink? Image shows dark icons.
-                            ),
-                            SizedBox(width: 8.w),
-                            Icon(
-                              Icons.favorite_border, // Heart icon
-                              size: 14.sp,
-                              color: Colors.white,
-                            ),
-                          ],
+                          child: const Icon(
+                            Icons.broken_image,
+                            color: Colors.grey,
+                          ),
                         ),
                       ),
                     ),
@@ -341,8 +325,12 @@ class ClientHomeScreen extends StatelessWidget {
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
-                          Icons.star_border, // Always star border in the image
-                          color: Colors.black87,
+                          (recipe.isFavorite ?? false)
+                              ? Icons.star
+                              : Icons.star_border,
+                          color: (recipe.isFavorite ?? false)
+                              ? const Color(0xFFFF8FA3)
+                              : Colors.black87,
                           size: 20.sp,
                         ),
                       ),
@@ -361,12 +349,11 @@ class ClientHomeScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        meal.title.toUpperCase(), // Uppercase from image
+                        (recipe.title ?? "").toUpperCase(),
                         style: GoogleFonts.playfairDisplay(
                           fontSize: 18.sp,
-                          fontWeight:
-                              FontWeight.w400, // Regular weight, not bold
-                          color: Colors.grey[800], // Dark grey/black
+                          fontWeight: FontWeight.w400,
+                          color: const Color(0xFF333333),
                           letterSpacing: 0.5,
                         ),
                       ),
@@ -382,10 +369,10 @@ class ClientHomeScreen extends StatelessWidget {
                           ),
                           SizedBox(width: 5.w),
                           Text(
-                            meal.time,
+                            "${(recipe.prepTime ?? 0) + (recipe.cookTime ?? 0)}m",
                             style: GoogleFonts.lato(
                               fontSize: 13.sp,
-                              fontWeight: FontWeight.w600, // Semi-bold
+                              fontWeight: FontWeight.w500,
                               color: Colors.black87,
                             ),
                           ),
@@ -397,7 +384,7 @@ class ClientHomeScreen extends StatelessWidget {
                           ),
                           SizedBox(width: 5.w),
                           Text(
-                            meal.servings,
+                            "${recipe.servings ?? 0}",
                             style: GoogleFonts.lato(
                               fontSize: 13.sp,
                               fontWeight: FontWeight.w600,
@@ -406,7 +393,7 @@ class ClientHomeScreen extends StatelessWidget {
                           ),
                           SizedBox(width: 20.w),
                           Text(
-                            meal.calories,
+                            "${recipe.nutrition?.calories ?? 0} cal",
                             style: GoogleFonts.lato(
                               fontSize: 13.sp,
                               fontWeight: FontWeight.bold, // Boldest
@@ -418,14 +405,13 @@ class ClientHomeScreen extends StatelessWidget {
                       SizedBox(height: 12.h),
 
                       Text(
-                        meal.description,
-                        maxLines:
-                            2, // Limit lines based on image looking concise
+                        recipe.description ?? "",
+                        maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.lato(
+                        style: GoogleFonts.merriweather(
                           fontSize: 14.sp,
                           color: Colors.grey[600],
-                          height: 1.5,
+                          height: 1.6,
                         ),
                       ),
                     ],

@@ -11,4 +11,5 @@ class ApiConstant {
   static const String forgetPassword = "$apiVersion/auth/forget-password";
   static const String resetPassword = "$apiVersion/auth/reset-password";
   static const String resendOtp = "$apiVersion/auth/resend-otp";
+  static const String recipe = "$apiVersion/recipe";
 }

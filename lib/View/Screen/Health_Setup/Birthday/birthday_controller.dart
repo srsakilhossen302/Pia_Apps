@@ -10,13 +10,6 @@ class BirthdayController extends GetxController {
   var dateText = "".obs;
   final TextEditingController dateController = TextEditingController();
 
-  @override
-  void onInit() {
-    super.onInit();
-    // Default empty or set? Image shows MM/DD/YYYY placeholder.
-    // dateController.text = "";
-  }
-
   void onDateSelected(DateTime date) {
     selectedDate.value = date;
     // Format: MM/DD/YYYY
