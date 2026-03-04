@@ -12,4 +12,5 @@ class ApiConstant {
   static const String resetPassword = "$apiVersion/auth/reset-password";
   static const String resendOtp = "$apiVersion/auth/resend-otp";
   static const String recipe = "$apiVersion/recipe";
+  static const String userProfile = "$apiVersion/user/profile";
 }

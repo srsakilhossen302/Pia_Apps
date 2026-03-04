@@ -153,13 +153,26 @@ class RecipeModel {
       // ignore mapping errors for simple types
     }
 
-    // Safely parse booleans from either bool or string
-    isFavorite =
-        json['isFavorite'] == true ||
-        json['isFavorite']?.toString().toLowerCase() == 'true';
-    isSaved =
-        json['isSaved'] == true ||
-        json['isSaved']?.toString().toLowerCase() == 'true';
+    // Safely parse booleans from either bool, string or int (0/1)
+    if (json['isFavorite'] is bool) {
+      isFavorite = json['isFavorite'];
+    } else if (json['isFavorite'] is String) {
+      isFavorite = json['isFavorite']?.toString().toLowerCase() == 'true';
+    } else if (json['isFavorite'] is int) {
+      isFavorite = json['isFavorite'] == 1;
+    } else {
+      isFavorite = false;
+    }
+
+    if (json['isSaved'] is bool) {
+      isSaved = json['isSaved'];
+    } else if (json['isSaved'] is String) {
+      isSaved = json['isSaved']?.toString().toLowerCase() == 'true';
+    } else if (json['isSaved'] is int) {
+      isSaved = json['isSaved'] == 1;
+    } else {
+      isSaved = false;
+    }
   }
 }
 

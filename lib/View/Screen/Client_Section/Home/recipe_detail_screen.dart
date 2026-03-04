@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -23,7 +22,8 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
   @override
   void initState() {
     super.initState();
-    controller = Get.put(RecipeDetailController());
+    // Use unique tag to avoid controller reuse issues
+    controller = Get.put(RecipeDetailController(), tag: widget.recipe.id);
     controller.recipe.value = widget.recipe;
 
     // Always fetch latest details exactly once when entering screen
@@ -35,350 +35,268 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Obx(() {
-      final currentRecipe = controller.recipe.value ?? widget.recipe;
-      String imageUrl = currentRecipe.image != null
-          ? (currentRecipe.image!.startsWith('http')
-                ? currentRecipe.image!
-                : "${ApiConstant.baseUrl}${currentRecipe.image}")
-          : 'https://via.placeholder.com/400';
+  void dispose() {
+    Get.delete<RecipeDetailController>(tag: widget.recipe.id);
+    super.dispose();
+  }
 
-      return Scaffold(
-        backgroundColor: const Color(0xFFFFF3F4), // Light pink background
-        body: SingleChildScrollView(
-          padding: EdgeInsets.only(top: 50.h),
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(30.r),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 15,
-                  spreadRadius: 2,
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFFFF3F4), // Light pink background
+      body: Obx(() {
+        final currentRecipe = controller.recipe.value ?? widget.recipe;
+        String imageUrl = currentRecipe.image != null
+            ? (currentRecipe.image!.startsWith('http')
+                  ? currentRecipe.image!
+                  : "${ApiConstant.baseUrl}${currentRecipe.image}")
+            : 'https://via.placeholder.com/400';
+
+        return Stack(
+          children: [
+            // === Top Image Section ===
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              height: 320.h,
+              child: Container(
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                    image: NetworkImage(imageUrl),
+                    fit: BoxFit.cover,
+                    onError: (exception, stackTrace) =>
+                        const NetworkImage('https://via.placeholder.com/400'),
+                  ),
                 ),
-              ],
-            ),
-            child: Column(
-              children: [
-                // === Top Image Section ===
-                Container(
-                  height: 256.h,
-                  width: double.infinity,
+                child: Container(
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.vertical(
-                      top: Radius.circular(30.r),
-                    ), // Rounded Top Only
-                    image: DecorationImage(
-                      image: NetworkImage(imageUrl),
-                      fit: BoxFit.cover,
-                      onError: (exception, stackTrace) =>
-                          const NetworkImage('https://via.placeholder.com/400'),
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.black.withOpacity(0.0),
+                        Colors.black.withOpacity(0.7),
+                      ],
+                      stops: const [0.4, 1.0],
                     ),
                   ),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.black.withOpacity(0.1),
-                          Colors.black.withOpacity(0.8),
-                        ],
-                        stops: const [0.3, 1.0],
-                      ),
-                    ),
-                    child: Padding(
-                      padding: EdgeInsets.all(20.w),
-                      child: Stack(
-                        children: [
-                          // CLOSE BUTTON
-                          Align(
-                            alignment: Alignment.topRight,
-                            child: SafeArea(
-                              child: GestureDetector(
-                                onTap: () => Get.back(),
-                                child: Container(
-                                  padding: EdgeInsets.all(8.w),
-                                  decoration: const BoxDecoration(
-                                    color: Colors.white,
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: Icon(
-                                    Icons.close,
-                                    size: 20.sp,
-                                    color: Colors.black,
-                                  ),
+                ),
+              ),
+            ),
+
+            // === Close Button ===
+            Positioned(
+              top: 50.h,
+              right: 20.w,
+              child: GestureDetector(
+                onTap: () => Get.back(),
+                child: Container(
+                  padding: EdgeInsets.all(8.w),
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(Icons.close, size: 20.sp, color: Colors.black),
+                ),
+              ),
+            ),
+
+            // === Header Content (Over Image) ===
+            Positioned(
+              top: 140.h,
+              left: 20.w,
+              right: 20.w,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Phase Tags
+                  if (currentRecipe.phases != null &&
+                      currentRecipe.phases!.isNotEmpty)
+                    Wrap(
+                      spacing: 8.w,
+                      runSpacing: 8.h,
+                      children: currentRecipe.phases!.map((tag) {
+                        String iconPath = AppIcons.heartIcon;
+                        if (tag.toLowerCase().contains('follicular')) {
+                          iconPath = AppIcons.follicularPhase;
+                        } else if (tag.toLowerCase().contains('luteal')) {
+                          iconPath = AppIcons.lutealPhase;
+                        } else if (tag.toLowerCase().contains('ovulation')) {
+                          iconPath = AppIcons.ovulationPhase;
+                        }
+                        return Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 12.w,
+                            vertical: 6.h,
+                          ),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFFCDD2).withOpacity(0.9),
+                            borderRadius: BorderRadius.circular(20.r),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Image.asset(
+                                iconPath,
+                                height: 12.sp,
+                                width: 12.sp,
+                                color: Colors.black87,
+                              ),
+                              SizedBox(width: 6.w),
+                              Text(
+                                tag,
+                                style: GoogleFonts.lato(
+                                  fontSize: 10.sp,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black87,
                                 ),
                               ),
-                            ),
+                            ],
                           ),
-
-                          // CONTENT (Tags, Title, Info)
-                          Align(
-                            alignment: Alignment.bottomLeft,
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                if (currentRecipe.phases != null &&
-                                    currentRecipe.phases!.isNotEmpty)
-                                  Wrap(
-                                    spacing: 8.w,
-                                    runSpacing: 8.h,
-                                    children: currentRecipe.phases!.map((tag) {
-                                      String iconPath = AppIcons.heartIcon;
-                                      if (tag.toLowerCase().contains(
-                                        'follicular',
-                                      )) {
-                                        iconPath = AppIcons.follicularPhase;
-                                      } else if (tag.toLowerCase().contains(
-                                        'luteal',
-                                      )) {
-                                        iconPath = AppIcons.lutealPhase;
-                                      } else if (tag.toLowerCase().contains(
-                                        'ovulation',
-                                      )) {
-                                        iconPath = AppIcons.ovulationPhase;
-                                      }
-                                      return Container(
-                                        padding: EdgeInsets.symmetric(
-                                          horizontal: 14.w,
-                                          vertical: 8.h,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: const Color(
-                                            0xFFFFCDD2,
-                                          ).withOpacity(0.9),
-                                          borderRadius: BorderRadius.circular(
-                                            25.r,
-                                          ),
-                                        ),
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Image.asset(
-                                              iconPath,
-                                              height: 14.sp,
-                                              width: 14.sp,
-                                              color: Colors.black87,
-                                            ),
-                                            SizedBox(width: 6.w),
-                                            Text(
-                                              tag,
-                                              style: GoogleFonts.lato(
-                                                fontSize: 12.sp,
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.black87,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      );
-                                    }).toList(),
-                                  ),
-                                SizedBox(height: 15.h),
-                                Text(
-                                  (currentRecipe.title ?? "").toUpperCase(),
-                                  style: GoogleFonts.playfairDisplay(
-                                    fontSize: 24.sp,
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w400,
-                                    letterSpacing: 0.5,
-                                  ),
-                                ),
-                                SizedBox(height: 12.h),
-                                SingleChildScrollView(
-                                  scrollDirection: Axis.horizontal,
-                                  child: Row(
-                                    children: [
-                                      Icon(
-                                        Icons.access_time,
-                                        color: Colors.white70,
-                                        size: 16.sp,
-                                      ),
-                                      SizedBox(width: 5.w),
-                                      Text(
-                                        "${(currentRecipe.prepTime ?? 0) + (currentRecipe.cookTime ?? 0)}m",
-                                        style: GoogleFonts.lato(
-                                          color: Colors.white,
-                                          fontSize: 14.sp,
-                                        ),
-                                      ),
-                                      SizedBox(width: 20.w),
-                                      Icon(
-                                        Icons.people_outline,
-                                        color: Colors.white70,
-                                        size: 16.sp,
-                                      ),
-                                      SizedBox(width: 5.w),
-                                      Text(
-                                        "${currentRecipe.servings} servings",
-                                        style: GoogleFonts.lato(
-                                          color: Colors.white,
-                                          fontSize: 14.sp,
-                                        ),
-                                      ),
-                                      SizedBox(width: 20.w),
-                                      Icon(
-                                        Icons.local_fire_department,
-                                        color: Colors.white70,
-                                        size: 16.sp,
-                                      ),
-                                      SizedBox(width: 5.w),
-                                      Text(
-                                        "${currentRecipe.nutrition?.calories ?? 0} cal",
-                                        style: GoogleFonts.lato(
-                                          color: Colors.white,
-                                          fontSize: 14.sp,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
+                        );
+                      }).toList(),
+                    ),
+                  SizedBox(height: 12.h),
+                  Text(
+                    (currentRecipe.title ?? "").toUpperCase(),
+                    style: GoogleFonts.playfairDisplay(
+                      fontSize: 24.sp,
+                      color: Colors.white,
+                      fontWeight: FontWeight.w400,
+                      letterSpacing: 0.5,
                     ),
                   ),
-                ),
+                  SizedBox(height: 10.h),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.access_time,
+                        color: Colors.white70,
+                        size: 14.sp,
+                      ),
+                      SizedBox(width: 5.w),
+                      Text(
+                        "${(currentRecipe.prepTime ?? 0) + (currentRecipe.cookTime ?? 0)} min",
+                        style: GoogleFonts.lato(
+                          color: Colors.white,
+                          fontSize: 12.sp,
+                        ),
+                      ),
+                      SizedBox(width: 15.w),
+                      Icon(
+                        Icons.people_outline,
+                        color: Colors.white70,
+                        size: 14.sp,
+                      ),
+                      SizedBox(width: 5.w),
+                      Text(
+                        "${currentRecipe.servings ?? 1} servings",
+                        style: GoogleFonts.lato(
+                          color: Colors.white,
+                          fontSize: 12.sp,
+                        ),
+                      ),
+                      SizedBox(width: 15.w),
+                      Icon(
+                        Icons.local_fire_department,
+                        color: Colors.white70,
+                        size: 14.sp,
+                      ),
+                      SizedBox(width: 5.w),
+                      Text(
+                        "${currentRecipe.nutrition?.calories ?? 0} cal",
+                        style: GoogleFonts.lato(
+                          color: Colors.white,
+                          fontSize: 12.sp,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
 
-                // === White Body Content Section ===
-                Container(
+            // === Scrollable White Body ===
+            Padding(
+              padding: EdgeInsets.only(top: 280.h),
+              child: Container(
+                decoration: BoxDecoration(
                   color: Colors.white,
-                  width: double.infinity,
+                  borderRadius: BorderRadius.vertical(
+                    top: Radius.circular(30.r),
+                  ),
+                ),
+                child: SingleChildScrollView(
+                  padding: EdgeInsets.fromLTRB(20.w, 25.h, 20.w, 40.h),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // === Buttons Section ===
-                      Padding(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 20.w,
-                          vertical: 25.h,
-                        ),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: OutlinedButton.icon(
-                                onPressed: () {
-                                  controller.toggleFavorite();
-                                },
-                                icon: Icon(
-                                  (currentRecipe.isFavorite ?? false)
-                                      ? Icons.star
-                                      : Icons.star_border,
-                                  color: (currentRecipe.isFavorite ?? false)
-                                      ? Colors.white
-                                      : const Color(0xFFF294A8),
-                                  size: 20.sp,
-                                ),
-                                label: Text(
-                                  "Add to Favorites",
-                                  style: GoogleFonts.lato(
-                                    color: (currentRecipe.isFavorite ?? false)
-                                        ? Colors.white
-                                        : Colors.black87,
-                                    fontSize: 14.sp,
-                                  ),
-                                ),
-                                style: OutlinedButton.styleFrom(
-                                  padding: EdgeInsets.symmetric(vertical: 14.h),
-                                  side: (currentRecipe.isFavorite ?? false)
-                                      ? BorderSide.none
-                                      : BorderSide(
-                                          color: const Color(
-                                            0xFFF294A8,
-                                          ).withOpacity(0.5),
-                                        ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(30.r),
-                                  ),
-                                  backgroundColor:
-                                      (currentRecipe.isFavorite ?? false)
-                                      ? const Color(0xFFF294A8)
-                                      : const Color(0xffFFF8F6),
-                                  elevation: (currentRecipe.isFavorite ?? false)
-                                      ? 4
-                                      : 0,
-                                ),
-                              ),
+                      // === Add to Favorites Button ===
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton.icon(
+                          onPressed: () {
+                            controller.toggleFavorite();
+                          },
+                          icon: Icon(
+                            (currentRecipe.isFavorite ?? false)
+                                ? Icons.star
+                                : Icons.star_border,
+                            color: (currentRecipe.isFavorite ?? false)
+                                ? const Color(0xFFFF8FA3)
+                                : Colors.black87,
+                            size: 18.sp,
+                          ),
+                          label: Text(
+                            "Add to Favorites",
+                            style: GoogleFonts.lato(
+                              color: (currentRecipe.isFavorite ?? false)
+                                  ? const Color(0xFFFF8FA3)
+                                  : Colors.black87,
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.w600,
                             ),
-                            SizedBox(width: 15.w),
-                            Expanded(
-                              child: OutlinedButton.icon(
-                                onPressed: () {
-                                  controller.toggleSave();
-                                },
-                                icon: Icon(
-                                  (currentRecipe.isSaved ?? false)
-                                      ? Icons.bookmark
-                                      : Icons.bookmark_border,
-                                  color: (currentRecipe.isSaved ?? false)
-                                      ? Colors.white
-                                      : const Color(0xFFFF8FA3),
-                                  size: 20.sp,
-                                ),
-                                label: Text(
-                                  "Save Recipe",
-                                  style: GoogleFonts.lato(
-                                    color: (currentRecipe.isSaved ?? false)
-                                        ? Colors.white
-                                        : Colors.black87,
-                                    fontSize: 14.sp,
-                                  ),
-                                ),
-                                style: OutlinedButton.styleFrom(
-                                  padding: EdgeInsets.symmetric(vertical: 14.h),
-                                  side: (currentRecipe.isSaved ?? false)
-                                      ? BorderSide.none
-                                      : BorderSide(
-                                          color: const Color(
-                                            0xFFFF8FA3,
-                                          ).withOpacity(0.5),
-                                        ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(30.r),
-                                  ),
-                                  backgroundColor:
-                                      (currentRecipe.isSaved ?? false)
-                                      ? const Color(0xFFFF8FA3)
-                                      : const Color(0xffFFF8F6),
-                                  elevation: (currentRecipe.isSaved ?? false)
-                                      ? 4
-                                      : 0,
-                                ),
-                              ),
+                          ),
+                          style: OutlinedButton.styleFrom(
+                            padding: EdgeInsets.symmetric(vertical: 12.h),
+                            side: BorderSide(
+                              color: (currentRecipe.isFavorite ?? false)
+                                  ? const Color(0xFFFF8FA3)
+                                  : const Color(0xFFFFC1E3),
                             ),
-                          ],
-                        ),
-                      ),
-
-                      // === Description ===
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 20.w),
-                        child: Text(
-                          currentRecipe.description ?? "",
-                          style: GoogleFonts.lato(
-                            fontSize: 15.sp,
-                            color: Colors.black87,
-                            height: 1.6,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(25.r),
+                            ),
+                            backgroundColor: (currentRecipe.isFavorite ?? false)
+                                ? const Color(0xFFFFF0F3)
+                                : Colors.white,
                           ),
                         ),
                       ),
 
-                      SizedBox(height: 30.h),
+                      SizedBox(height: 20.h),
+
+                      // === Description ===
+                      Text(
+                        currentRecipe.description ?? "",
+                        style: GoogleFonts.lato(
+                          fontSize: 14.sp,
+                          color: Colors.black87,
+                          height: 1.5,
+                        ),
+                      ),
+
+                      SizedBox(height: 25.h),
 
                       // === Phase Benefits ===
                       if (currentRecipe.phaseBenefits != null &&
                           currentRecipe.phaseBenefits!.isNotEmpty)
                         Container(
-                          margin: EdgeInsets.symmetric(horizontal: 20.w),
-                          padding: EdgeInsets.all(24.w),
+                          width: double.infinity,
+                          padding: EdgeInsets.all(20.w),
                           decoration: BoxDecoration(
-                            color: const Color(0xffFFF8F6),
+                            color: const Color(0xFFFFF5F2), // Light peach/pink
                             borderRadius: BorderRadius.circular(20.r),
                           ),
                           child: Column(
@@ -387,275 +305,215 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                               Text(
                                 "PHASE BENEFITS",
                                 style: GoogleFonts.playfairDisplay(
-                                  fontSize: 14.sp,
+                                  fontSize: 12.sp,
                                   fontWeight: FontWeight.w600,
-                                  color: Colors.grey[600],
-                                  letterSpacing: 1.2,
+                                  color: Colors.black54,
+                                  letterSpacing: 1.0,
                                 ),
                               ),
-                              SizedBox(height: 12.h),
+                              SizedBox(height: 10.h),
                               ...currentRecipe.phaseBenefits!.entries.map((
                                 entry,
                               ) {
-                                return Padding(
-                                  padding: EdgeInsets.only(bottom: 8.h),
+                                return Text(
+                                  "${entry.value}", // Just showing value as description
+                                  style: GoogleFonts.lato(
+                                    fontSize: 13.sp,
+                                    color: Colors.black87,
+                                    height: 1.5,
+                                  ),
+                                );
+                              }),
+                            ],
+                          ),
+                        ),
+
+                      SizedBox(height: 25.h),
+
+                      // === Nutrition Per Serving ===
+                      if (currentRecipe.nutrition != null) ...[
+                        Text(
+                          "NUTRITION PER SERVING",
+                          style: GoogleFonts.playfairDisplay(
+                            fontSize: 14.sp,
+                            color: Colors.black54,
+                            letterSpacing: 0.5,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        SizedBox(height: 15.h),
+                        GridView.count(
+                          crossAxisCount: 2,
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          childAspectRatio: 2.2,
+                          mainAxisSpacing: 10.h,
+                          crossAxisSpacing: 10.w,
+                          children: [
+                            _nutritionCard(
+                              "Protein",
+                              "${currentRecipe.nutrition?.protein ?? 0}g",
+                            ),
+                            _nutritionCard(
+                              "Carbs",
+                              "${currentRecipe.nutrition?.carbs ?? 0}g",
+                            ),
+                            _nutritionCard(
+                              "Fat",
+                              "${currentRecipe.nutrition?.fat ?? 0}g",
+                            ),
+                            _nutritionCard(
+                              "Calories",
+                              "${currentRecipe.nutrition?.calories ?? 0}",
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 25.h),
+                      ],
+
+                      // === Ingredients ===
+                      if (currentRecipe.ingredients != null &&
+                          currentRecipe.ingredients!.isNotEmpty) ...[
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              "INGREDIENTS",
+                              style: GoogleFonts.playfairDisplay(
+                                fontSize: 16.sp,
+                                color: Colors.black87,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                            Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 12.w,
+                                vertical: 6.h,
+                              ),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFFF8FA3),
+                                borderRadius: BorderRadius.circular(20.r),
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.shopping_cart_outlined,
+                                    size: 14.sp,
+                                    color: Colors.white,
+                                  ),
+                                  SizedBox(width: 5.w),
+                                  Text(
+                                    "Add to Grocery",
+                                    style: GoogleFonts.lato(
+                                      color: Colors.white,
+                                      fontSize: 10.sp,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 15.h),
+                        ...currentRecipe.ingredients!.map((ingredient) {
+                          return Padding(
+                            padding: EdgeInsets.symmetric(vertical: 8.h),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  ingredient.name ?? "",
+                                  style: GoogleFonts.lato(
+                                    fontSize: 14.sp,
+                                    color: Colors.black87,
+                                  ),
+                                ),
+                                Text(
+                                  "${ingredient.amount ?? ""} ${ingredient.unit ?? ""}",
+                                  style: GoogleFonts.lato(
+                                    fontSize: 14.sp,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black87,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }),
+                        SizedBox(height: 25.h),
+                      ],
+
+                      // === Instructions ===
+                      if (currentRecipe.instructions != null &&
+                          currentRecipe.instructions!.isNotEmpty) ...[
+                        Text(
+                          "INSTRUCTIONS",
+                          style: GoogleFonts.playfairDisplay(
+                            fontSize: 16.sp,
+                            color: Colors.black87,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                        SizedBox(height: 15.h),
+                        ...currentRecipe.instructions!.asMap().entries.map((
+                          entry,
+                        ) {
+                          return Padding(
+                            padding: EdgeInsets.only(bottom: 15.h),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Container(
+                                  width: 24.w,
+                                  height: 24.w,
+                                  alignment: Alignment.center,
+                                  decoration: const BoxDecoration(
+                                    color: Color(0xFFFF8FA3),
+                                    shape: BoxShape.circle,
+                                  ),
                                   child: Text(
-                                    "${entry.key}: ${entry.value}",
+                                    "${entry.key + 1}",
+                                    style: GoogleFonts.lato(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 12.sp,
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(width: 12.w),
+                                Expanded(
+                                  child: Text(
+                                    entry.value,
                                     style: GoogleFonts.lato(
                                       fontSize: 14.sp,
                                       color: Colors.black87,
                                       height: 1.5,
                                     ),
                                   ),
-                                );
-                              }),
-                            ],
-                          ),
-                        ),
-
-                      SizedBox(height: 35.h),
-
-                      // === Nutrition Per Serving ===
-                      if (currentRecipe.nutrition != null)
-                        Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 20.w),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                "NUTRITION PER SERVING",
-                                style: GoogleFonts.playfairDisplay(
-                                  fontSize: 16.sp,
-                                  color: Colors.grey[700],
-                                  letterSpacing: 0.5,
                                 ),
-                              ),
-                              SizedBox(height: 20.h),
-                              GridView.count(
-                                crossAxisCount: 2,
-                                shrinkWrap: true,
-                                physics: const NeverScrollableScrollPhysics(),
-                                childAspectRatio: 2.5,
-                                mainAxisSpacing: 15.h,
-                                crossAxisSpacing: 15.w,
-                                children: [
-                                  _colItem(
-                                    "Protein",
-                                    "${currentRecipe.nutrition?.protein ?? 0}g",
-                                  ),
-                                  _colItem(
-                                    "Carbs",
-                                    "${currentRecipe.nutrition?.carbs ?? 0}g",
-                                  ),
-                                  _colItem(
-                                    "Fat",
-                                    "${currentRecipe.nutrition?.fat ?? 0}g",
-                                  ),
-                                  _colItem(
-                                    "Calories",
-                                    "${currentRecipe.nutrition?.calories ?? 0}",
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-
-                      SizedBox(height: 35.h),
-
-                      // === Ingredients ===
-                      if (currentRecipe.ingredients != null &&
-                          currentRecipe.ingredients!.isNotEmpty)
-                        Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 20.w),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    "INGREDIENTS",
-                                    style: GoogleFonts.playfairDisplay(
-                                      fontSize: 18.sp,
-                                      color: Colors.grey[800],
-                                      letterSpacing: 0.5,
-                                    ),
-                                  ),
-                                  Container(
-                                    padding: EdgeInsets.symmetric(
-                                      horizontal: 16.w,
-                                      vertical: 8.h,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: const Color(0xFFFF8FA3),
-                                      borderRadius: BorderRadius.circular(25.r),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: const Color(
-                                            0xFFFF8FA3,
-                                          ).withOpacity(0.3),
-                                          blurRadius: 8,
-                                          offset: const Offset(0, 4),
-                                        ),
-                                      ],
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        Icon(
-                                          Icons.shopping_cart_outlined,
-                                          size: 16.sp,
-                                          color: Colors.white,
-                                        ),
-                                        SizedBox(width: 8.w),
-                                        Text(
-                                          "Add to Grocery",
-                                          style: GoogleFonts.lato(
-                                            color: Colors.white,
-                                            fontSize: 13.sp,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              SizedBox(height: 20.h),
-                              ...currentRecipe.ingredients!.map((ingredient) {
-                                return Padding(
-                                  padding: EdgeInsets.only(bottom: 12.h),
-                                  child: Container(
-                                    padding: EdgeInsets.symmetric(
-                                      horizontal: 20.w,
-                                      vertical: 16.h,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: const Color(0xFFFFF8F6),
-                                      borderRadius: BorderRadius.circular(16.r),
-                                    ),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(
-                                          ingredient.name ?? "",
-                                          style: GoogleFonts.lato(
-                                            fontSize: 16.sp,
-                                            color: Colors.black87,
-                                          ),
-                                        ),
-                                        Text(
-                                          "${ingredient.amount ?? ""} ${ingredient.unit ?? ""}",
-                                          style: GoogleFonts.lato(
-                                            fontSize: 16.sp,
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.black87,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                );
-                              }),
-                            ],
-                          ),
-                        ),
-
-                      SizedBox(height: 35.h),
-
-                      // === Instructions ===
-                      if (currentRecipe.instructions != null &&
-                          currentRecipe.instructions!.isNotEmpty)
-                        Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 20.w),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                "INSTRUCTIONS",
-                                style: GoogleFonts.playfairDisplay(
-                                  fontSize: 18.sp,
-                                  color: Colors.grey[800],
-                                  letterSpacing: 0.5,
-                                ),
-                              ),
-                              SizedBox(height: 20.h),
-                              ...currentRecipe.instructions!
-                                  .asMap()
-                                  .entries
-                                  .map((entry) {
-                                    int index = entry.key + 1;
-                                    String instruction = entry.value;
-                                    return Padding(
-                                      padding: EdgeInsets.only(bottom: 25.h),
-                                      child: Row(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Container(
-                                            width: 28.w,
-                                            height: 28.w,
-                                            alignment: Alignment.center,
-                                            decoration: const BoxDecoration(
-                                              color: Color(0xFFFF8FA3),
-                                              shape: BoxShape.circle,
-                                            ),
-                                            child: Text(
-                                              "$index",
-                                              style: GoogleFonts.lato(
-                                                color: Colors.white,
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 14.sp,
-                                              ),
-                                            ),
-                                          ),
-                                          SizedBox(width: 18.w),
-                                          Expanded(
-                                            child: Text(
-                                              instruction,
-                                              style: GoogleFonts.lato(
-                                                fontSize: 16.sp,
-                                                color: Colors.black87,
-                                                height: 1.5,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    );
-                                  }),
-                            ],
-                          ),
-                        ),
-
-                      SizedBox(height: 50.h),
+                              ],
+                            ),
+                          );
+                        }),
+                      ],
                     ],
                   ),
                 ),
-              ],
+              ),
             ),
-          ),
-        ),
-      );
-    });
+          ],
+        );
+      }),
+    );
   }
 
-  Widget _colItem(String title, String value) {
+  Widget _nutritionCard(String title, String value) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
       decoration: BoxDecoration(
-        color: const Color(0xffFFF8F6),
-        borderRadius: BorderRadius.circular(16.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.08),
-            blurRadius: 10,
-            spreadRadius: 2,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        color: const Color(0xFFFFF9F9),
+        borderRadius: BorderRadius.circular(15.r),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -663,9 +521,9 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
         children: [
           Text(
             title,
-            style: GoogleFonts.lato(fontSize: 12.sp, color: Colors.grey[500]),
+            style: GoogleFonts.lato(fontSize: 10.sp, color: Colors.grey[600]),
           ),
-          SizedBox(height: 6.h),
+          SizedBox(height: 4.h),
           Text(
             value,
             style: GoogleFonts.lato(

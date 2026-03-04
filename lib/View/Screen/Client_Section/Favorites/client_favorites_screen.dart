@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../../../Model/Client_Section/meal_model.dart';
+import '../../../../Model/Client_Section/recipe_model.dart';
+import '../../../../Utils/AppIcons/app_icons.dart';
 import '../../../Widgets/custom_bottom_nav_bar.dart';
-import '../Home/meal_detail_screen.dart';
+import '../../../../service/api_url.dart';
+import '../Home/recipe_detail_screen.dart';
 import 'client_favorites_controller.dart';
 
 class ClientFavoritesScreen extends StatelessWidget {
@@ -75,16 +77,34 @@ class ClientFavoritesScreen extends StatelessWidget {
 
                 // === Favorites List ===
                 Expanded(
-                  child: Obx(
-                    () => ListView.builder(
+                  child: Obx(() {
+                    if (controller.isLoading.value) {
+                      return const Center(
+                        child: CircularProgressIndicator(
+                          color: Color(0xFFF48FB1),
+                        ),
+                      );
+                    }
+                    if (controller.favoriteMeals.isEmpty) {
+                      return Center(
+                        child: Text(
+                          "No favorite recipes yet.",
+                          style: GoogleFonts.lato(
+                            fontSize: 16.sp,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                      );
+                    }
+                    return ListView.builder(
                       padding: EdgeInsets.fromLTRB(20.w, 0, 20.w, 120.h),
                       itemCount: controller.favoriteMeals.length,
                       itemBuilder: (context, index) {
-                        final meal = controller.favoriteMeals[index];
-                        return _buildFavoriteMealCard(context, meal);
+                        final recipe = controller.favoriteMeals[index];
+                        return _buildFavoriteMealCard(context, recipe);
                       },
-                    ),
-                  ),
+                    );
+                  }),
                 ),
               ],
             ),
@@ -102,10 +122,16 @@ class ClientFavoritesScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildFavoriteMealCard(BuildContext context, MealModel meal) {
+  Widget _buildFavoriteMealCard(BuildContext context, RecipeModel recipe) {
+    String imageUrl = recipe.image != null
+        ? (recipe.image!.startsWith('http')
+              ? recipe.image!
+              : "${ApiConstant.baseUrl}${recipe.image}")
+        : 'https://via.placeholder.com/400';
+
     return GestureDetector(
       onTap: () {
-        Get.to(() => MealDetailScreen(meal: meal));
+        Get.to(() => RecipeDetailScreen(recipe: recipe));
       },
       child: Container(
         margin: EdgeInsets.only(bottom: 20.h),
@@ -131,7 +157,7 @@ class ClientFavoritesScreen extends StatelessWidget {
                     top: Radius.circular(20.r),
                   ),
                   child: Image.network(
-                    meal.imageUrl,
+                    imageUrl,
                     height: 160.h,
                     width: double.infinity,
                     fit: BoxFit.cover,
@@ -145,36 +171,38 @@ class ClientFavoritesScreen extends StatelessWidget {
                   ),
                 ),
                 // Top Left Badge
-                Positioned(
-                  top: 15.h,
-                  left: 15.w,
-                  child: Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 8.w,
-                      vertical: 4.h,
-                    ),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF48FB1), // Pink pill
-                      borderRadius: BorderRadius.circular(20.r),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.diamond_outlined,
-                          color: Colors.white,
-                          size: 12.sp,
-                        ),
-                        SizedBox(width: 4.w),
-                        Icon(
-                          Icons.favorite_border,
-                          color: Colors.white,
-                          size: 12.sp,
-                        ),
-                      ],
+                if (recipe.phases != null && recipe.phases!.isNotEmpty)
+                  Positioned(
+                    top: 15.h,
+                    left: 15.w,
+                    child: Wrap(
+                      spacing: 8.w,
+                      runSpacing: 8.h,
+                      children: recipe.phases!.map((tag) {
+                        String iconPath = AppIcons.heartIcon;
+                        if (tag.toLowerCase().contains('follicular')) {
+                          iconPath = AppIcons.follicularPhase;
+                        } else if (tag.toLowerCase().contains('luteal')) {
+                          iconPath = AppIcons.lutealPhase;
+                        } else if (tag.toLowerCase().contains('ovulation')) {
+                          iconPath = AppIcons.ovulationPhase;
+                        }
+                        return Container(
+                          padding: EdgeInsets.all(6.w),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFFCDD2).withOpacity(0.9),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Image.asset(
+                            iconPath,
+                            height: 14.sp,
+                            width: 14.sp,
+                            color: Colors.black87,
+                          ),
+                        );
+                      }).toList(),
                     ),
                   ),
-                ),
                 // Top Right Action (Star)
                 Positioned(
                   top: 15.h,
@@ -205,7 +233,7 @@ class ClientFavoritesScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    meal.title.toUpperCase(),
+                    (recipe.title ?? "").toUpperCase(),
                     style: GoogleFonts.playfairDisplay(
                       fontSize: 16.sp,
                       fontWeight: FontWeight.w600,
@@ -225,7 +253,7 @@ class ClientFavoritesScreen extends StatelessWidget {
                       ),
                       SizedBox(width: 4.w),
                       Text(
-                        meal.time,
+                        "${(recipe.prepTime ?? 0) + (recipe.cookTime ?? 0)}m",
                         style: GoogleFonts.lato(
                           fontSize: 12.sp,
                           color: Colors.black87,
@@ -239,7 +267,7 @@ class ClientFavoritesScreen extends StatelessWidget {
                       ),
                       SizedBox(width: 4.w),
                       Text(
-                        meal.servings,
+                        "${recipe.servings ?? 0} servings",
                         style: GoogleFonts.lato(
                           fontSize: 12.sp,
                           color: Colors.black87,
@@ -247,7 +275,7 @@ class ClientFavoritesScreen extends StatelessWidget {
                       ),
                       SizedBox(width: 16.w),
                       Text(
-                        meal.calories,
+                        "${recipe.nutrition?.calories ?? 0} cal",
                         style: GoogleFonts.playfairDisplay(
                           fontSize: 12.sp,
                           color: Colors.black87,
@@ -260,7 +288,7 @@ class ClientFavoritesScreen extends StatelessWidget {
                   SizedBox(height: 10.h),
 
                   Text(
-                    meal.description,
+                    recipe.description ?? "",
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.playfairDisplay(

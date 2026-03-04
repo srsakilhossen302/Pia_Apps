@@ -1,8 +1,12 @@
 import 'package:get/get.dart';
-import '../../../../Model/Client_Section/meal_model.dart';
+import '../../../../Model/Client_Section/recipe_model.dart';
+import '../../../../helper/shared_prefe/shared_prefe.dart';
+import '../../../../helper/toast_helper.dart';
+import '../../../../service/api_url.dart';
 
 class ClientFavoritesController extends GetxController {
-  final RxList<MealModel> favoriteMeals = <MealModel>[].obs;
+  final RxList<RecipeModel> favoriteMeals = <RecipeModel>[].obs;
+  final RxBool isLoading = false.obs;
 
   @override
   void onInit() {
@@ -10,45 +14,34 @@ class ClientFavoritesController extends GetxController {
     loadFavorites();
   }
 
-  void loadFavorites() {
-    // In a real app, this would filter from a main list or fetch from API/Local Storage
-    // For this UI demo, we will mock the data matching the image
-
-    favoriteMeals.value = [
-      MealModel(
-        imageUrl:
-            'https://images.unsplash.com/photo-1467003909585-2f8a7270028d?q=80&w=600', // Salmon Bowl
-        title: "SALMON QUINOA POWER BOWL",
-        time: "25m",
-        servings: "1",
-        calories: "520 cal",
-        description:
-            "A complete meal with lean protein, whole grains, and fresh vegetables, perfect for sustained energy and",
-        isFavorite: true,
-        tags: ["Lunch"],
-        nutrition: {"Protein": "30g", "Carbs": "45g"},
-        ingredients: {"Salmon": "150g", "Quinoa": "1 cup"},
-        instructions: ["Cook quinoa", "Grill salmon", "Mix visuals"],
-      ),
-      MealModel(
-        imageUrl:
-            'https://images.unsplash.com/photo-1517620114540-4f6a4c43f8ed?q=80&w=600', // Oatmeal
-        title: "BERRY OATMEAL BOWL",
-        time: "10m",
-        servings: "1",
-        calories: "380 cal",
-        description:
-            "A warm, comforting breakfast bowl packed with whole grains, fresh berries, and heart-healthy nuts.",
-        isFavorite: true,
-        tags: ["Breakfast"],
-        nutrition: {"Protein": "10g", "Fiber": "8g"},
-        ingredients: {
-          "Oats": "1/2 cup",
-          "Berries": "Handful",
-          "Nuts": "1 tbsp",
+  Future<void> loadFavorites() async {
+    isLoading.value = true;
+    update();
+    try {
+      final token = await SharePrefsHelper.getString(
+        SharedPreferenceValue.token,
+      );
+      final response = await GetConnect().get(
+        "${ApiConstant.baseUrl}${ApiConstant.recipe}/my-favorites",
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer $token',
         },
-        instructions: ["Cook oats", "Top with fruit"],
-      ),
-    ];
+      );
+
+      if (response.statusCode == 200) {
+        final recipeResponse = RecipeResponseModel.fromJson(response.body);
+        favoriteMeals.assignAll(recipeResponse.data ?? []);
+      } else {
+        ToastHelper.showError(
+          response.body['message'] ?? "Failed to load favorites",
+        );
+      }
+    } catch (e) {
+      ToastHelper.showError("Network error: $e");
+    } finally {
+      isLoading.value = false;
+      update();
+    }
   }
 }

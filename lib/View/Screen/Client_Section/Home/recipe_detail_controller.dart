@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:get/get.dart';
+import 'package:flutter/foundation.dart'; // For debugPrint
 import '../../../../Model/Client_Section/recipe_model.dart';
 import '../../../../helper/shared_prefe/shared_prefe.dart';
 import '../../../../helper/toast_helper.dart';
@@ -17,6 +18,8 @@ class RecipeDetailController extends GetxController {
       final token = await SharePrefsHelper.getString(
         SharedPreferenceValue.token,
       );
+      debugPrint("Fetching details for ID: $id");
+
       final response = await GetConnect().get(
         "${ApiConstant.baseUrl}${ApiConstant.recipe}/$id",
         headers: {
@@ -25,13 +28,16 @@ class RecipeDetailController extends GetxController {
         },
       );
 
+      debugPrint("Get Details Response: ${response.statusCode}");
+
       if (response.statusCode == 200) {
         dynamic responseData = response.body;
+
         if (responseData is String) {
           try {
             responseData = jsonDecode(responseData);
           } catch (e) {
-            // ignore
+            debugPrint("Error decoding response: $e");
           }
         }
 
@@ -42,175 +48,161 @@ class RecipeDetailController extends GetxController {
               final singleRecipeResponse = SingleRecipeResponseModel.fromJson(
                 mappedData,
               );
-              recipe.value = singleRecipeResponse.data;
+              // Only update if data is not null to preserve existing data (like ID)
+              if (singleRecipeResponse.data != null) {
+                recipe.value = singleRecipeResponse.data;
+              }
             } else {
-              // API might return the object directly
               recipe.value = RecipeModel.fromJson(mappedData);
             }
           } catch (e) {
-            ToastHelper.showError("Parsing Error: $e");
+            debugPrint("Parsing Error: $e");
           }
         }
 
-        recipe.refresh(); // Ensure the UI updates with the new data
-
-        // Sync with Home Screen List just to make sure they match the single API response perfectly
-        if (Get.isRegistered<ClientHomeController>()) {
-          final homeController = Get.find<ClientHomeController>();
-          final index = homeController.recipeList.indexWhere(
-            (element) => element.id == recipe.value!.id,
-          );
-          if (index != -1) {
-            homeController.recipeList[index].isFavorite =
-                recipe.value!.isFavorite;
-            homeController.recipeList[index].isSaved = recipe.value!.isSaved;
-            homeController.recipeList.refresh();
-          }
-        }
+        recipe.refresh();
+        _syncWithHomeController();
       } else {
-        ToastHelper.showError(
-          response.body['message'] ?? "Failed to load recipe details",
-        );
+        // Don't show error for details fetch failure to avoid disrupting user experience
+        debugPrint("Failed to load details: ${response.body}");
       }
     } catch (e) {
-      ToastHelper.showError("Network error: $e");
+      debugPrint("Network error details: $e");
     } finally {
       isLoading.value = false;
       update();
     }
   }
 
-  Future<void> toggleFavorite() async {
-    if (recipe.value == null || recipe.value?.id == null) return;
-
-    final originalStatus = recipe.value!.isFavorite;
-
-    // Optimistic Update: change color immediately
-    recipe.value!.isFavorite = !(originalStatus ?? false);
-    recipe.refresh();
-
-    if (Get.isRegistered<ClientHomeController>()) {
-      final homeController = Get.find<ClientHomeController>();
-      final index = homeController.recipeList.indexWhere(
-        (element) => element.id == recipe.value!.id,
-      );
-      if (index != -1) {
-        homeController.recipeList[index].isFavorite = recipe.value!.isFavorite;
-        homeController.recipeList.refresh();
-      }
-    }
-
+  void _syncWithHomeController() {
     try {
-      final token = await SharePrefsHelper.getString(
-        SharedPreferenceValue.token,
-      );
-      final response = await GetConnect().post(
-        "${ApiConstant.baseUrl}${ApiConstant.recipe}/${recipe.value!.id}/favorite",
-        null, // No body
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-      );
-
-      if (response.statusCode != 200 && response.statusCode != 201) {
-        // Revert on failure
-        recipe.value!.isFavorite = originalStatus;
-        recipe.refresh();
-        if (Get.isRegistered<ClientHomeController>()) {
-          final homeController = Get.find<ClientHomeController>();
-          final index = homeController.recipeList.indexWhere(
-            (element) => element.id == recipe.value!.id,
-          );
-          if (index != -1) {
-            homeController.recipeList[index].isFavorite = originalStatus;
-            homeController.recipeList.refresh();
-          }
-        }
-        ToastHelper.showError(response.body['message'] ?? "Toggle failed");
-      }
-    } catch (e) {
-      // Revert on error
-      recipe.value!.isFavorite = originalStatus;
-      recipe.refresh();
-      if (Get.isRegistered<ClientHomeController>()) {
+      if (Get.isRegistered<ClientHomeController>() && recipe.value != null) {
         final homeController = Get.find<ClientHomeController>();
         final index = homeController.recipeList.indexWhere(
           (element) => element.id == recipe.value!.id,
         );
         if (index != -1) {
-          homeController.recipeList[index].isFavorite = originalStatus;
+          homeController.recipeList[index].isFavorite =
+              recipe.value!.isFavorite;
           homeController.recipeList.refresh();
         }
       }
-      ToastHelper.showError("Network error: $e");
+    } catch (e) {
+      debugPrint("Sync error: $e");
     }
   }
 
-  Future<void> toggleSave() async {
-    if (recipe.value == null || recipe.value?.id == null) return;
-
-    final originalStatus = recipe.value!.isSaved;
-
-    // Optimistic Update: change color immediately
-    recipe.value!.isSaved = !(originalStatus ?? false);
-    recipe.refresh();
-
-    if (Get.isRegistered<ClientHomeController>()) {
-      final homeController = Get.find<ClientHomeController>();
-      final index = homeController.recipeList.indexWhere(
-        (element) => element.id == recipe.value!.id,
-      );
-      if (index != -1) {
-        homeController.recipeList[index].isSaved = recipe.value!.isSaved;
-        homeController.recipeList.refresh();
-      }
+  Future<void> toggleFavorite() async {
+    if (recipe.value == null || recipe.value?.id == null) {
+      ToastHelper.showError("Error: Recipe ID is missing");
+      return;
     }
+
+    final String recipeId = recipe.value!.id!;
+    final originalStatus = recipe.value!.isFavorite;
+
+    // Optimistic Update
+    recipe.value!.isFavorite = !(originalStatus ?? false);
+    recipe.refresh();
+    _syncWithHomeController();
 
     try {
       final token = await SharePrefsHelper.getString(
         SharedPreferenceValue.token,
       );
+
+      if (token == null || token.isEmpty) {
+        _revertFavorite(originalStatus);
+        ToastHelper.showError("Authentication failed: No token");
+        return;
+      }
+
+      // debugPrint("Toggling favorite for: $recipeId");
+      final url =
+          "${ApiConstant.baseUrl}${ApiConstant.recipe}/$recipeId/favorite";
+
       final response = await GetConnect().post(
-        "${ApiConstant.baseUrl}${ApiConstant.recipe}/${recipe.value!.id}/save",
-        null, // No body
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
+        url,
+        {}, // Sending empty body
+        headers: {'Authorization': 'Bearer $token'},
       );
 
-      if (response.statusCode != 200 && response.statusCode != 201) {
-        // Revert on failure
-        recipe.value!.isSaved = originalStatus;
-        recipe.refresh();
-        if (Get.isRegistered<ClientHomeController>()) {
-          final homeController = Get.find<ClientHomeController>();
-          final index = homeController.recipeList.indexWhere(
-            (element) => element.id == recipe.value!.id,
-          );
-          if (index != -1) {
-            homeController.recipeList[index].isSaved = originalStatus;
-            homeController.recipeList.refresh();
+      debugPrint("Fav API: ${response.statusCode} - ${response.bodyString}");
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        dynamic responseData = response.body;
+
+        // Handle String response
+        if (responseData is String) {
+          try {
+            responseData = jsonDecode(responseData);
+          } catch (e) {
+            debugPrint("JSON Decode error: $e");
           }
         }
-        ToastHelper.showError(response.body['message'] ?? "Operation failed");
+
+        // Check for server-side success flag if present
+        if (responseData is Map && responseData.containsKey('success')) {
+          if (responseData['success'] == false) {
+            _revertFavorite(originalStatus);
+            ToastHelper.showError(
+              responseData['message'] ?? "Operation failed",
+            );
+            return;
+          }
+        }
+
+        // Success Feedback
+        String msg = (recipe.value!.isFavorite == true)
+            ? "Added to favorites"
+            : "Removed from favorites";
+        if (responseData is Map && responseData['message'] != null) {
+          msg = responseData['message'];
+        }
+        ToastHelper.showSuccess(msg);
+
+        // Update state from server response if available
+        bool? serverIsFavorite;
+        if (responseData is Map && responseData.containsKey('data')) {
+          final data = responseData['data'];
+          if (data is Map && data.containsKey('isFavorite')) {
+            var isFav = data['isFavorite'];
+            if (isFav is bool) {
+              serverIsFavorite = isFav;
+            } else if (isFav is String) {
+              serverIsFavorite = isFav.toLowerCase() == 'true';
+            } else if (isFav is int) {
+              serverIsFavorite = isFav == 1;
+            }
+          }
+        }
+
+        if (serverIsFavorite != null) {
+          if (recipe.value!.isFavorite != serverIsFavorite) {
+            recipe.value!.isFavorite = serverIsFavorite;
+            recipe.refresh();
+            _syncWithHomeController();
+          }
+        }
+      } else {
+        // Revert on HTTP error
+        _revertFavorite(originalStatus);
+        String errorMsg = "Failed (${response.statusCode})";
+        if (response.body is Map && response.body['message'] != null) {
+          errorMsg = response.body['message'];
+        }
+        ToastHelper.showError(errorMsg);
       }
     } catch (e) {
-      // Revert on error
-      recipe.value!.isSaved = originalStatus;
-      recipe.refresh();
-      if (Get.isRegistered<ClientHomeController>()) {
-        final homeController = Get.find<ClientHomeController>();
-        final index = homeController.recipeList.indexWhere(
-          (element) => element.id == recipe.value!.id,
-        );
-        if (index != -1) {
-          homeController.recipeList[index].isSaved = originalStatus;
-          homeController.recipeList.refresh();
-        }
-      }
-      ToastHelper.showError("Network error: $e");
+      _revertFavorite(originalStatus);
+      ToastHelper.showError("Connection error: $e");
+      debugPrint("Toggle Exception: $e");
     }
+  }
+
+  void _revertFavorite(bool? originalStatus) {
+    recipe.value!.isFavorite = originalStatus;
+    recipe.refresh();
+    _syncWithHomeController();
   }
 }
