@@ -8,28 +8,36 @@ import '../../../../Utils/AppIcons/app_icons.dart';
 import '../../../../service/api_url.dart';
 import 'recipe_detail_controller.dart';
 
-class RecipeDetailScreen extends StatelessWidget {
+class RecipeDetailScreen extends StatefulWidget {
   final RecipeModel recipe;
 
   const RecipeDetailScreen({super.key, required this.recipe});
 
   @override
+  State<RecipeDetailScreen> createState() => _RecipeDetailScreenState();
+}
+
+class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
+  late RecipeDetailController controller;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = Get.put(RecipeDetailController());
+    controller.recipe.value = widget.recipe;
+
+    // Always fetch latest details exactly once when entering screen
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (widget.recipe.id != null) {
+        controller.getRecipeDetails(widget.recipe.id!);
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final controller = Get.put(RecipeDetailController());
-
-    // Initialize with data from list view and then fetch full details
-    if (controller.recipe.value == null ||
-        controller.recipe.value?.id != recipe.id) {
-      controller.recipe.value = recipe;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (recipe.id != null) {
-          controller.getRecipeDetails(recipe.id!);
-        }
-      });
-    }
-
     return Obx(() {
-      final currentRecipe = controller.recipe.value ?? recipe;
+      final currentRecipe = controller.recipe.value ?? widget.recipe;
       String imageUrl = currentRecipe.image != null
           ? (currentRecipe.image!.startsWith('http')
                 ? currentRecipe.image!

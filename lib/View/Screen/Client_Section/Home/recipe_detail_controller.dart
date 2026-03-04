@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:get/get.dart';
 import '../../../../Model/Client_Section/recipe_model.dart';
 import '../../../../helper/shared_prefe/shared_prefe.dart';
@@ -25,10 +26,47 @@ class RecipeDetailController extends GetxController {
       );
 
       if (response.statusCode == 200) {
-        final singleRecipeResponse = SingleRecipeResponseModel.fromJson(
-          response.body,
-        );
-        recipe.value = singleRecipeResponse.data;
+        dynamic responseData = response.body;
+        if (responseData is String) {
+          try {
+            responseData = jsonDecode(responseData);
+          } catch (e) {
+            // ignore
+          }
+        }
+
+        if (responseData is Map) {
+          try {
+            final mappedData = Map<String, dynamic>.from(responseData);
+            if (mappedData.containsKey('data')) {
+              final singleRecipeResponse = SingleRecipeResponseModel.fromJson(
+                mappedData,
+              );
+              recipe.value = singleRecipeResponse.data;
+            } else {
+              // API might return the object directly
+              recipe.value = RecipeModel.fromJson(mappedData);
+            }
+          } catch (e) {
+            ToastHelper.showError("Parsing Error: $e");
+          }
+        }
+
+        recipe.refresh(); // Ensure the UI updates with the new data
+
+        // Sync with Home Screen List just to make sure they match the single API response perfectly
+        if (Get.isRegistered<ClientHomeController>()) {
+          final homeController = Get.find<ClientHomeController>();
+          final index = homeController.recipeList.indexWhere(
+            (element) => element.id == recipe.value!.id,
+          );
+          if (index != -1) {
+            homeController.recipeList[index].isFavorite =
+                recipe.value!.isFavorite;
+            homeController.recipeList[index].isSaved = recipe.value!.isSaved;
+            homeController.recipeList.refresh();
+          }
+        }
       } else {
         ToastHelper.showError(
           response.body['message'] ?? "Failed to load recipe details",

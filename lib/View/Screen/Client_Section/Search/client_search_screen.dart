@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../../../Model/Client_Section/meal_model.dart';
+import '../../../../Model/Client_Section/recipe_model.dart';
+import '../../../../service/api_url.dart';
 import '../../../Widgets/custom_bottom_nav_bar.dart';
-import '../Home/meal_detail_screen.dart';
+import '../Home/recipe_detail_screen.dart';
 import 'client_search_controller.dart';
 
 class ClientSearchScreen extends StatelessWidget {
@@ -51,7 +52,7 @@ class ClientSearchScreen extends StatelessWidget {
                           SizedBox(width: 10.w),
                           Expanded(
                             child: TextField(
-                              onChanged: controller.filterMeals,
+                              onChanged: controller.updateSearchQuery,
                               decoration: InputDecoration(
                                 hintText:
                                     "Search recipes by name or ingredient...",
@@ -74,8 +75,6 @@ class ClientSearchScreen extends StatelessWidget {
                     ),
                   ),
 
-                  // === Filter Button ===
-                  SizedBox(height: 15.h),
                   // === Filter Button ===
                   SizedBox(height: 15.h),
                   GestureDetector(
@@ -180,6 +179,7 @@ class ClientSearchScreen extends StatelessWidget {
                             ),
                             child: TextField(
                               controller: controller.maxCaloriesController,
+                              onChanged: controller.updateMaxCalories,
                               decoration: InputDecoration(
                                 hintText: "e.g., 500",
                                 hintStyle: GoogleFonts.lato(
@@ -266,23 +266,30 @@ class ClientSearchScreen extends StatelessWidget {
                     padding: EdgeInsets.symmetric(horizontal: 24.w),
                     child: Align(
                       alignment: Alignment.centerLeft,
-                      child: Obx(
-                        () => Text(
+                      child: Obx(() {
+                        if (controller.isLoading.value) {
+                          return const Text("Loading...");
+                        }
+                        return Text(
                           "${controller.searchResults.length} recipes found",
                           style: GoogleFonts.playfairDisplay(
                             color: Colors.grey[700],
                             fontSize: 14.sp,
                           ),
-                        ),
-                      ),
+                        );
+                      }),
                     ),
                   ),
 
                   SizedBox(height: 15.h),
 
                   // === Recipe List ===
-                  Obx(
-                    () => ListView.builder(
+                  Obx(() {
+                    if (controller.isLoading.value) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+
+                    return ListView.builder(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
                       padding: EdgeInsets.fromLTRB(
@@ -293,11 +300,11 @@ class ClientSearchScreen extends StatelessWidget {
                       ), // Bottom padding for navbar
                       itemCount: controller.searchResults.length,
                       itemBuilder: (context, index) {
-                        final meal = controller.searchResults[index];
-                        return _buildSearchMealCard(context, meal);
+                        final recipe = controller.searchResults[index];
+                        return _buildSearchMealCard(context, recipe);
                       },
-                    ),
-                  ),
+                    );
+                  }),
                 ],
               ),
             ),
@@ -317,11 +324,11 @@ class ClientSearchScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSearchMealCard(BuildContext context, MealModel meal) {
+  Widget _buildSearchMealCard(BuildContext context, RecipeModel recipe) {
     return GestureDetector(
       onTap: () {
-        // Navigate to Meal Detail
-        Get.to(() => MealDetailScreen(meal: meal));
+        // Navigate to Recipe Detail
+        Get.to(() => RecipeDetailScreen(recipe: recipe));
       },
       child: Container(
         margin: EdgeInsets.only(bottom: 20.h),
@@ -347,7 +354,11 @@ class ClientSearchScreen extends StatelessWidget {
                     top: Radius.circular(20.r),
                   ),
                   child: Image.network(
-                    meal.imageUrl,
+                    recipe.image != null
+                        ? (recipe.image!.startsWith('http')
+                              ? recipe.image!
+                              : "${ApiConstant.baseUrl}${recipe.image}")
+                        : 'https://via.placeholder.com/400',
                     height: 160.h,
                     width: double.infinity,
                     fit: BoxFit.cover,
@@ -394,9 +405,23 @@ class ClientSearchScreen extends StatelessWidget {
                   right: 15.w,
                   child: Row(
                     children: [
-                      _buildCircleIcon(Icons.star_border), // Star
+                      _buildCircleIcon(
+                        recipe.isFavorite == true
+                            ? Icons.star
+                            : Icons.star_border,
+                        color: recipe.isFavorite == true
+                            ? const Color(0xFFFF8FA3)
+                            : Colors.black87,
+                      ), // Star
                       SizedBox(width: 8.w),
-                      _buildCircleIcon(Icons.bookmark_border), // Bookmark
+                      _buildCircleIcon(
+                        recipe.isSaved == true
+                            ? Icons.bookmark
+                            : Icons.bookmark_border,
+                        color: recipe.isSaved == true
+                            ? const Color(0xFFFF8FA3)
+                            : Colors.black87,
+                      ), // Bookmark
                     ],
                   ),
                 ),
@@ -410,7 +435,7 @@ class ClientSearchScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    meal.title.toUpperCase(),
+                    (recipe.title ?? "").toUpperCase(),
                     style: GoogleFonts.playfairDisplay(
                       fontSize: 16.sp,
                       fontWeight: FontWeight.w600,
@@ -430,7 +455,7 @@ class ClientSearchScreen extends StatelessWidget {
                       ),
                       SizedBox(width: 4.w),
                       Text(
-                        meal.time,
+                        "${(recipe.prepTime ?? 0) + (recipe.cookTime ?? 0)}m",
                         style: GoogleFonts.lato(
                           fontSize: 12.sp,
                           color: Colors.black87,
@@ -444,7 +469,7 @@ class ClientSearchScreen extends StatelessWidget {
                       ),
                       SizedBox(width: 4.w),
                       Text(
-                        meal.servings,
+                        "${recipe.servings ?? 1}",
                         style: GoogleFonts.lato(
                           fontSize: 12.sp,
                           color: Colors.black87,
@@ -452,7 +477,7 @@ class ClientSearchScreen extends StatelessWidget {
                       ),
                       SizedBox(width: 16.w),
                       Text(
-                        meal.calories,
+                        "${recipe.nutrition?.calories ?? 0} cal",
                         style: GoogleFonts.playfairDisplay(
                           fontSize: 12.sp,
                           color: Colors.black87,
@@ -465,7 +490,7 @@ class ClientSearchScreen extends StatelessWidget {
                   SizedBox(height: 10.h),
 
                   Text(
-                    meal.description,
+                    recipe.description ?? "",
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.playfairDisplay(
@@ -483,7 +508,7 @@ class ClientSearchScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildCircleIcon(IconData icon) {
+  Widget _buildCircleIcon(IconData icon, {Color color = Colors.black87}) {
     return Container(
       width: 32.w,
       height: 32.w,
@@ -492,7 +517,7 @@ class ClientSearchScreen extends StatelessWidget {
         shape: BoxShape.circle,
       ),
       child: Center(
-        child: Icon(icon, size: 18.sp, color: Colors.black87),
+        child: Icon(icon, size: 18.sp, color: color),
       ),
     );
   }

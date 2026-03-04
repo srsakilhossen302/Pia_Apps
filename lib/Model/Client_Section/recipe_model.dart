@@ -108,36 +108,58 @@ class RecipeModel {
   });
 
   RecipeModel.fromJson(Map<String, dynamic> json) {
-    feelings = json['feelings'];
-    nutrients = json['nutrients'];
-    id = json['_id'];
-    title = json['title'];
-    description = json['description'];
-    image = json['image'];
-    category = json['category'];
-    phases = json['phases'] != null ? List<String>.from(json['phases']) : [];
-    prepTime = json['prepTime'];
-    cookTime = json['cookTime'];
-    servings = json['servings'];
-    if (json['ingredients'] != null) {
-      ingredients = <Ingredients>[];
-      json['ingredients'].forEach((v) {
-        ingredients!.add(Ingredients.fromJson(v));
-      });
+    try {
+      feelings = json['feelings'];
+      nutrients = json['nutrients'];
+      id = json['_id']?.toString();
+      title = json['title']?.toString();
+      description = json['description']?.toString();
+      image = json['image']?.toString();
+      category = json['category']?.toString();
+      phases =
+          (json['phases'] as List?)?.map((e) => e.toString()).toList() ?? [];
+      prepTime = num.tryParse(json['prepTime']?.toString() ?? '')?.toInt();
+      cookTime = num.tryParse(json['cookTime']?.toString() ?? '')?.toInt();
+      servings = num.tryParse(json['servings']?.toString() ?? '')?.toInt();
+
+      if (json['ingredients'] != null && json['ingredients'] is List) {
+        ingredients = <Ingredients>[];
+        for (var v in json['ingredients']) {
+          ingredients!.add(Ingredients.fromJson(v));
+        }
+      }
+
+      instructions =
+          (json['instructions'] as List?)?.map((e) => e.toString()).toList() ??
+          [];
+
+      if (json['nutrition'] != null && json['nutrition'] is Map) {
+        nutrition = Nutrition.fromJson(
+          Map<String, dynamic>.from(json['nutrition']),
+        );
+      }
+
+      if (json['phaseBenefits'] != null && json['phaseBenefits'] is Map) {
+        phaseBenefits = Map<String, String>.from(
+          (json['phaseBenefits'] as Map).map(
+            (k, v) => MapEntry(k.toString(), v.toString()),
+          ),
+        );
+      }
+
+      createdAt = json['createdAt']?.toString();
+      updatedAt = json['updatedAt']?.toString();
+    } catch (e) {
+      // ignore mapping errors for simple types
     }
-    instructions = json['instructions'] != null
-        ? List<String>.from(json['instructions'])
-        : [];
-    nutrition = json['nutrition'] != null
-        ? Nutrition.fromJson(json['nutrition'])
-        : null;
-    if (json['phaseBenefits'] != null) {
-      phaseBenefits = Map<String, String>.from(json['phaseBenefits']);
-    }
-    createdAt = json['createdAt'];
-    updatedAt = json['updatedAt'];
-    isFavorite = json['isFavorite'];
-    isSaved = json['isSaved'];
+
+    // Safely parse booleans from either bool or string
+    isFavorite =
+        json['isFavorite'] == true ||
+        json['isFavorite']?.toString().toLowerCase() == 'true';
+    isSaved =
+        json['isSaved'] == true ||
+        json['isSaved']?.toString().toLowerCase() == 'true';
   }
 }
 
@@ -164,9 +186,9 @@ class Nutrition {
   Nutrition({this.calories, this.protein, this.carbs, this.fat});
 
   Nutrition.fromJson(Map<String, dynamic> json) {
-    calories = json['calories'];
-    protein = json['protein'];
-    carbs = json['carbs'];
-    fat = json['fat'];
+    calories = num.tryParse(json['calories']?.toString() ?? '')?.toInt();
+    protein = num.tryParse(json['protein']?.toString() ?? '')?.toInt();
+    carbs = num.tryParse(json['carbs']?.toString() ?? '')?.toInt();
+    fat = num.tryParse(json['fat']?.toString() ?? '')?.toInt();
   }
 }
