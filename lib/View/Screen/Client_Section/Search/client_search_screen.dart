@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../../../Model/Client_Section/recipe_model.dart';
+import '../../../../Model/Client_Section/cycle_overview_model.dart';
 import '../../../../service/api_url.dart';
 import '../../../Widgets/custom_bottom_nav_bar.dart';
 import '../Home/recipe_detail_screen.dart';

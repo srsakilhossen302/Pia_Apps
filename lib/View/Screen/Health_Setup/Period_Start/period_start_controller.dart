@@ -1,4 +1,8 @@
+import 'dart:convert';
 import 'package:get/get.dart';
+import '../../../../helper/shared_prefe/shared_prefe.dart';
+import '../../../../helper/toast_helper.dart';
+import '../../../../service/api_url.dart';
 import '../../Client_Section/Home/client_home_screen.dart';
 import '../Period_Length/period_length_screen.dart';
 
@@ -13,24 +17,29 @@ class PeriodStartController extends GetxController {
   Future<void> savePeriodStart() async {
     isLoading.value = true;
     try {
-      // TODO: Implement POST API to save period start date
-      print(
-        "Saving Period Start Date: ${selectedDate.value.toIso8601String()}",
+      final token = await SharePrefsHelper.getString(SharedPreferenceValue.token);
+      final body = {
+        "lastPeriodStartDate": selectedDate.value.toUtc().toIso8601String()
+      };
+      
+      final formData = FormData({
+        "data": jsonEncode(body)
+      });
+      
+      final response = await GetConnect().patch(
+        "${ApiConstant.baseUrl}${ApiConstant.userProfile}",
+        formData,
+        headers: {'Authorization': 'Bearer $token'},
       );
 
-      // Simulate API call
-      await Future.delayed(const Duration(seconds: 2));
-
-      // Navigate to next screen (or Home for now as per previous flow)
-      // The user said "SignUp kore otp page jaya otp diya ClientHomeScreen page na jaya ai page jabe"
-      // So this is the destination after OTP. Where to go AFTER this?
-      // Probably next step of setup, but for now let's go to ClientHomeScreen or just stay/show success.
-      // Assuming flow completes or goes to next step. I'll route to ClientHomeScreen for now or just show success.
-      // Navigate to Period Length Screen (Step 2)
-      Get.to(() => PeriodLengthScreen());
-      Get.snackbar("Success", "Information saved successfully");
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        ToastHelper.showSuccess("Information saved successfully");
+        Get.to(() => PeriodLengthScreen());
+      } else {
+        ToastHelper.showError(response.body?['message'] ?? "Failed to save data");
+      }
     } catch (e) {
-      Get.snackbar("Error", "Failed to save data");
+      ToastHelper.showError("Network error: $e");
     } finally {
       isLoading.value = false;
     }

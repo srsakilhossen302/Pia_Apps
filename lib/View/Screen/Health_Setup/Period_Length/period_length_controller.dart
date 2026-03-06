@@ -1,4 +1,8 @@
+import 'dart:convert';
 import 'package:get/get.dart';
+import '../../../../helper/shared_prefe/shared_prefe.dart';
+import '../../../../helper/toast_helper.dart';
+import '../../../../service/api_url.dart';
 import '../../Client_Section/Home/client_home_screen.dart';
 import '../../Health_Setup/Cycle_Length/cycle_length_screen.dart';
 
@@ -16,26 +20,29 @@ class PeriodLengthController extends GetxController {
   Future<void> savePeriodLength() async {
     isLoading.value = true;
     try {
-      // TODO: Implement POST API to save period length
-      print("Saving Period Length: ${selectedDays.value} days");
+      final token = await SharePrefsHelper.getString(SharedPreferenceValue.token);
+      final body = {
+        "periodLength": selectedDays.value
+      };
+      
+      final formData = FormData({
+        "data": jsonEncode(body)
+      });
+      
+      final response = await GetConnect().patch(
+        "${ApiConstant.baseUrl}${ApiConstant.userProfile}",
+        formData,
+        headers: {'Authorization': 'Bearer $token'},
+      );
 
-      // Simulate API call
-      await Future.delayed(const Duration(seconds: 2));
-
-      // Navigate to next screen (Step 3)
-      // For now, staying here or going back to home as placeholder
-      // User hasn't finished flow, but I will simulate success.
-      // Next step would be "Cycle Length" usually.
-      // For now, I'll show a snackbar and maybe navigate to Home if no next step defined yet.
-      Get.snackbar("Success", "Period length saved successfully");
-
-      // Navigate to Cycle Length Screen (Step 3)
-      Get.to(() => CycleLengthScreen());
-
-      // Navigate to next screen - Placeholder
-      // Get.to(() => NextScreen());
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        ToastHelper.showSuccess("Period length saved successfully");
+        Get.to(() => CycleLengthScreen());
+      } else {
+        ToastHelper.showError(response.body?['message'] ?? "Failed to save data");
+      }
     } catch (e) {
-      Get.snackbar("Error", "Failed to save data");
+      ToastHelper.showError("Network error: $e");
     } finally {
       isLoading.value = false;
     }

@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:get/get.dart';
 import 'package:flutter/foundation.dart'; // For debugPrint
-import '../../../../Model/Client_Section/recipe_model.dart';
+import '../../../../Model/Client_Section/cycle_overview_model.dart';
 import '../../../../helper/shared_prefe/shared_prefe.dart';
 import '../../../../helper/toast_helper.dart';
 import '../../../../service/api_url.dart';
@@ -78,13 +78,20 @@ class RecipeDetailController extends GetxController {
     try {
       if (Get.isRegistered<ClientHomeController>() && recipe.value != null) {
         final homeController = Get.find<ClientHomeController>();
-        final index = homeController.recipeList.indexWhere(
-          (element) => element.id == recipe.value!.id,
-        );
-        if (index != -1) {
-          homeController.recipeList[index].isFavorite =
-              recipe.value!.isFavorite;
-          homeController.recipeList.refresh();
+        if (homeController.cycleOverview.value?.recipes != null) {
+          bool found = false;
+          homeController.cycleOverview.value!.recipes!.forEach((category, list) {
+            final index = list.indexWhere(
+              (element) => element.id == recipe.value!.id,
+            );
+            if (index != -1) {
+              list[index].isFavorite = recipe.value!.isFavorite;
+              found = true;
+            }
+          });
+          if (found) {
+            homeController.cycleOverview.refresh();
+          }
         }
       }
     } catch (e) {

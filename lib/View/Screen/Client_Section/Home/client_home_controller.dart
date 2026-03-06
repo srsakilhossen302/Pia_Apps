@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:pia/Model/Client_Section/meal_model.dart';
 import 'package:pia/Utils/AppIcons/app_icons.dart';
-import '../../../../Model/Client_Section/recipe_model.dart';
+import '../../../../Model/Client_Section/cycle_overview_model.dart';
 import '../../../../helper/shared_prefe/shared_prefe.dart';
 import '../../../../helper/toast_helper.dart';
 import '../../../../service/api_url.dart';
@@ -28,8 +28,8 @@ class ClientHomeController extends GetxController {
   final RxBool isProfileComplete = false.obs;
   late PageController pageController;
 
-  final RxList<RecipeModel> recipeList = <RecipeModel>[].obs;
-  final RxBool isLoadingRecipe = false.obs;
+  final Rx<CycleOverviewData?> cycleOverview = Rx<CycleOverviewData?>(null);
+  final RxBool isLoadingCycle = false.obs;
 
   final List<ClientPhaseModel> phases = [
     ClientPhaseModel(
@@ -204,18 +204,18 @@ class ClientHomeController extends GetxController {
   void onInit() {
     super.onInit();
     pageController = PageController(viewportFraction: 1.0);
-    getRecipes();
+    getCycleOverview();
   }
 
-  Future<void> getRecipes() async {
-    isLoadingRecipe.value = true;
+  Future<void> getCycleOverview() async {
+    isLoadingCycle.value = true;
     update();
     try {
       final token = await SharePrefsHelper.getString(
         SharedPreferenceValue.token,
       );
       final response = await GetConnect().get(
-        "${ApiConstant.baseUrl}${ApiConstant.recipe}",
+        "${ApiConstant.baseUrl}${ApiConstant.cycleOverview}",
         headers: {
           'Content-Type': 'application/json; charset=UTF-8',
           'Authorization': 'Bearer $token',
@@ -223,20 +223,22 @@ class ClientHomeController extends GetxController {
       );
 
       if (response.statusCode == 200) {
-        final recipeResponse = RecipeResponseModel.fromJson(response.body);
-        recipeList.assignAll(recipeResponse.data ?? []);
+        final cycleResponse = CycleOverviewResponse.fromJson(response.body);
+        cycleOverview.value = cycleResponse.data;
       } else {
         ToastHelper.showError(
-          response.body['message'] ?? "Failed to load recipes",
+          response.body['message'] ?? "Failed to load cycle overview",
         );
       }
     } catch (e) {
       ToastHelper.showError("Network error: $e");
     } finally {
-      isLoadingRecipe.value = false;
+      isLoadingCycle.value = false;
       update();
     }
   }
+
+
 
   @override
   void onClose() {

@@ -1,3 +1,126 @@
+
+
+class CycleOverviewResponse {
+  final int? statusCode;
+  final bool? success;
+  final String? message;
+  final CycleOverviewData? data;
+
+  CycleOverviewResponse({
+    this.statusCode,
+    this.success,
+    this.message,
+    this.data,
+  });
+
+  factory CycleOverviewResponse.fromJson(Map<String, dynamic> json) {
+    return CycleOverviewResponse(
+      statusCode: json['statusCode'],
+      success: json['success'],
+      message: json['message'],
+      data: json['data'] != null ? CycleOverviewData.fromJson(json['data']) : null,
+    );
+  }
+}
+
+class CycleOverviewData {
+  final CurrentPhaseInfo? currentPhaseInfo;
+  final List<EducationalContent>? educationalContent;
+  final Map<String, List<RecipeModel>>? recipes;
+
+  CycleOverviewData({
+    this.currentPhaseInfo,
+    this.educationalContent,
+    this.recipes,
+  });
+
+  factory CycleOverviewData.fromJson(Map<String, dynamic> json) {
+    Map<String, List<RecipeModel>> recipesMap = {};
+    if (json['recipes'] != null) {
+      json['recipes'].forEach((key, value) {
+        if (value is List) {
+          recipesMap[key] = value.map((v) => RecipeModel.fromJson(v)).toList();
+        }
+      });
+    }
+
+    return CycleOverviewData(
+      currentPhaseInfo: json['currentPhaseInfo'] != null
+          ? CurrentPhaseInfo.fromJson(json['currentPhaseInfo'])
+          : null,
+      educationalContent: json['educationalContent'] != null
+          ? List<EducationalContent>.from(json['educationalContent']
+              .map((x) => EducationalContent.fromJson(x)))
+          : null,
+      recipes: recipesMap,
+    );
+  }
+}
+
+class CurrentPhaseInfo {
+  final String? phase;
+  final int? day;
+  final String? nutrition;
+  final String? wellness;
+  final String? healthNotes;
+  final String? nextPhase;
+  final int? daysUntilNextPhase;
+  final int? phaseProgress;
+  final bool? isHealthSetupComplete;
+
+  CurrentPhaseInfo({
+    this.phase,
+    this.day,
+    this.nutrition,
+    this.wellness,
+    this.healthNotes,
+    this.nextPhase,
+    this.daysUntilNextPhase,
+    this.phaseProgress,
+    this.isHealthSetupComplete,
+  });
+
+  factory CurrentPhaseInfo.fromJson(Map<String, dynamic> json) {
+    return CurrentPhaseInfo(
+      phase: json['phase'],
+      day: json['day'],
+      nutrition: json['nutrition'],
+      wellness: json['wellness'],
+      healthNotes: json['healthNotes'],
+      nextPhase: json['nextPhase'],
+      daysUntilNextPhase: json['daysUntilNextPhase'],
+      phaseProgress: json['phaseProgress'],
+      isHealthSetupComplete: json['isHealthSetupComplete'],
+    );
+  }
+}
+
+class EducationalContent {
+  final String? phase;
+  final String? description;
+  final String? nutrition;
+  final String? wellness;
+  final String? energy;
+
+  EducationalContent({
+    this.phase,
+    this.description,
+    this.nutrition,
+    this.wellness,
+    this.energy,
+  });
+
+  factory EducationalContent.fromJson(Map<String, dynamic> json) {
+    return EducationalContent(
+      phase: json['phase'],
+      description: json['description'],
+      nutrition: json['nutrition'],
+      wellness: json['wellness'],
+      energy: json['energy'],
+    );
+  }
+}
+
 class RecipeResponseModel {
   int? statusCode;
   bool? success;

@@ -1,4 +1,8 @@
+import 'dart:convert';
 import 'package:get/get.dart';
+import '../../../../helper/shared_prefe/shared_prefe.dart';
+import '../../../../helper/toast_helper.dart';
+import '../../../../service/api_url.dart';
 import '../../Client_Section/Home/client_home_screen.dart';
 import '../../Health_Setup/Birthday/birthday_screen.dart';
 
@@ -16,22 +20,29 @@ class CycleLengthController extends GetxController {
   Future<void> saveCycleLength() async {
     isLoading.value = true;
     try {
-      // TODO: Implement POST API to save cycle length
-      print("Saving Cycle Length: ${selectedDays.value} days");
+      final token = await SharePrefsHelper.getString(SharedPreferenceValue.token);
+      final body = {
+        "cycleLength": selectedDays.value
+      };
+      
+      final formData = FormData({
+        "data": jsonEncode(body)
+      });
+      
+      final response = await GetConnect().patch(
+        "${ApiConstant.baseUrl}${ApiConstant.userProfile}",
+        formData,
+        headers: {'Authorization': 'Bearer $token'},
+      );
 
-      // Simulate API call
-      await Future.delayed(const Duration(seconds: 2));
-
-      // Navigate to next screen (Step 4)
-      Get.snackbar("Success", "Cycle length saved successfully");
-
-      // Navigate to Birthday Screen (Step 4)
-      Get.to(() => BirthdayScreen());
-
-      // Navigate to next screen - Placeholder for Step 4
-      // Get.to(() => NextScreen());
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        ToastHelper.showSuccess("Cycle length saved successfully");
+        Get.to(() => BirthdayScreen());
+      } else {
+        ToastHelper.showError(response.body?['message'] ?? "Failed to save data");
+      }
     } catch (e) {
-      Get.snackbar("Error", "Failed to save data");
+      ToastHelper.showError("Network error: $e");
     } finally {
       isLoading.value = false;
     }

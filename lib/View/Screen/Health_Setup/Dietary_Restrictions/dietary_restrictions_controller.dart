@@ -1,5 +1,9 @@
+import 'dart:convert';
 import 'package:get/get.dart';
 import '../../../../Utils/AppIcons/app_icons.dart';
+import '../../../../helper/shared_prefe/shared_prefe.dart';
+import '../../../../helper/toast_helper.dart';
+import '../../../../service/api_url.dart';
 import '../../Client_Section/Home/client_home_screen.dart';
 
 class DietaryRestrictionsController extends GetxController {
@@ -73,18 +77,29 @@ class DietaryRestrictionsController extends GetxController {
   Future<void> completeSetup() async {
     isLoading.value = true;
     try {
-      // TODO: Implement POST API to save dietary restrictions
-      print("Saving Dietary Restrictions: ${selectedRestrictions.join(', ')}");
+      final token = await SharePrefsHelper.getString(SharedPreferenceValue.token);
+      final body = {
+        "dietaryRestrictions": selectedRestrictions.toList()
+      };
+      
+      final formData = FormData({
+        "data": jsonEncode(body)
+      });
+      
+      final response = await GetConnect().patch(
+        "${ApiConstant.baseUrl}${ApiConstant.userProfile}",
+        formData,
+        headers: {'Authorization': 'Bearer $token'},
+      );
 
-      // Simulate API call
-      await Future.delayed(const Duration(seconds: 2));
-
-      Get.snackbar("Success", "Health Setup completed successfully!");
-
-      // Navigate to Home Screen
-      Get.offAll(() => const ClientHomeScreen());
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        ToastHelper.showSuccess("Health Setup completed successfully!");
+        Get.offAll(() => const ClientHomeScreen());
+      } else {
+        ToastHelper.showError(response.body?['message'] ?? "Failed to save data");
+      }
     } catch (e) {
-      Get.snackbar("Error", "Failed to save data");
+      ToastHelper.showError("Network error: $e");
     } finally {
       isLoading.value = false;
     }
