@@ -302,7 +302,14 @@ class ClientSearchScreen extends StatelessWidget {
                       itemCount: controller.searchResults.length,
                       itemBuilder: (context, index) {
                         final recipe = controller.searchResults[index];
-                        return RecipeCard(recipe: recipe);
+                        return RecipeCard(
+                          recipe: recipe,
+                          onFavoriteTap: () {
+                            if (recipe.id != null) {
+                              controller.toggleFavorite(recipe.id!);
+                            }
+                          },
+                        );
                       },
                     );
                   }),

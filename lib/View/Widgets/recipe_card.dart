@@ -10,11 +10,13 @@ import '../Screen/Client_Section/Home/recipe_detail_screen.dart';
 class RecipeCard extends StatelessWidget {
   final RecipeModel recipe;
   final bool isFavoritePage;
+  final VoidCallback? onFavoriteTap;
 
   const RecipeCard({
     super.key,
     required this.recipe,
     this.isFavoritePage = false,
+    this.onFavoriteTap,
   });
 
   @override
@@ -103,22 +105,25 @@ class RecipeCard extends StatelessWidget {
                 Positioned(
                   top: 15.h,
                   right: 15.w,
-                  child: Container(
-                    width: 32.w,
-                    height: 32.w,
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Center(
-                      child: Icon(
-                        (recipe.isFavorite == true || isFavoritePage)
-                            ? Icons.star
-                            : Icons.star_border,
-                        size: 18.sp,
-                        color: (recipe.isFavorite == true || isFavoritePage)
-                            ? const Color(0xFFFF8FA3)
-                            : Colors.black87,
+                  child: GestureDetector(
+                    onTap: onFavoriteTap,
+                    child: Container(
+                      width: 32.w,
+                      height: 32.w,
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Center(
+                        child: Icon(
+                          (recipe.isFavorite == true || isFavoritePage)
+                              ? Icons.star
+                              : Icons.star_border,
+                          size: 18.sp,
+                          color: (recipe.isFavorite == true || isFavoritePage)
+                              ? const Color(0xFFFF8FA3)
+                              : Colors.black87,
+                        ),
                       ),
                     ),
                   ),

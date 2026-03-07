@@ -133,6 +133,54 @@ class ClientHomeController extends GetxController {
     super.onClose();
   }
 
+  Future<void> toggleFavorite(String recipeId) async {
+    final token = await SharePrefsHelper.getString(SharedPreferenceValue.token);
+    
+    // Find recipe locally and toggle it for immediate UI feedback
+    RecipeModel? targetRecipe;
+    
+    if (cycleOverview.value?.recipes != null) {
+      for (var category in cycleOverview.value!.recipes!.keys) {
+        final list = cycleOverview.value!.recipes![category];
+        final index = list?.indexWhere((element) => element.id == recipeId);
+        if (index != null && index != -1) {
+          targetRecipe = list![index];
+          // Toggle locally
+          targetRecipe.isFavorite = !(targetRecipe.isFavorite ?? false);
+          cycleOverview.refresh(); // Trigger Obx update
+          break;
+        }
+      }
+    }
+
+    try {
+      final response = await GetConnect().post(
+        "${ApiConstant.baseUrl}${ApiConstant.recipe}/$recipeId/favorite",
+        {},
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        // Revert on failure
+        if (targetRecipe != null) {
+          targetRecipe.isFavorite = !(targetRecipe.isFavorite ?? false);
+          cycleOverview.refresh();
+        }
+        ToastHelper.showError("Failed to update favorite: ${response.body?['message'] ?? response.statusText}");
+      }
+    } catch (e) {
+      // Revert on error
+      if (targetRecipe != null) {
+        targetRecipe.isFavorite = !(targetRecipe.isFavorite ?? false);
+        cycleOverview.refresh();
+      }
+      ToastHelper.showError("Network error: $e");
+    }
+  }
+
   void nextPage() {
     if (cycleOverview.value?.educationalContent != null) {
         if (currentIndex.value < cycleOverview.value!.educationalContent!.length - 1) {

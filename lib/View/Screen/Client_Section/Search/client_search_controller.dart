@@ -139,4 +139,45 @@ class ClientSearchController extends GetxController {
       isLoading.value = false;
     }
   }
+  Future<void> toggleFavorite(String recipeId) async {
+    final token = await SharePrefsHelper.getString(SharedPreferenceValue.token);
+    
+    // Find recipe locally and toggle it for immediate UI feedback
+    final index = searchResults.indexWhere((element) => element.id == recipeId);
+    RecipeModel? targetRecipe;
+    
+    if (index != -1) {
+      targetRecipe = searchResults[index];
+      // Toggle locally
+      targetRecipe.isFavorite = !(targetRecipe.isFavorite ?? false);
+      searchResults.refresh(); // Trigger Obx update
+    }
+
+    try {
+      final response = await GetConnect().post(
+        "${ApiConstant.baseUrl}${ApiConstant.recipe}/$recipeId/favorite",
+        {},
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        // Revert on failure
+        if (targetRecipe != null) {
+          targetRecipe.isFavorite = !(targetRecipe.isFavorite ?? false);
+          searchResults.refresh();
+        }
+        ToastHelper.showError("Failed to update favorite: ${response.body?['message'] ?? response.statusText}");
+      }
+    } catch (e) {
+      // Revert on error
+      if (targetRecipe != null) {
+        targetRecipe.isFavorite = !(targetRecipe.isFavorite ?? false);
+        searchResults.refresh();
+      }
+      ToastHelper.showError("Network error: $e");
+    }
+  }
 }

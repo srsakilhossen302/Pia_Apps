@@ -370,12 +370,12 @@ class ClientHomeScreen extends StatelessWidget {
           ],
         ),
         SizedBox(height: 15.h),
-        ...recipes.map((recipe) => _buildRecipeCard(recipe)).toList(),
+        ...recipes.map((recipe) => _buildRecipeCard(recipe, controller)).toList(),
       ],
     );
   }
 
-  Widget _buildRecipeCard(RecipeModel recipe) {
+  Widget _buildRecipeCard(RecipeModel recipe, ClientHomeController controller) {
     return GestureDetector(
       onTap: () {
         Get.to(() => RecipeDetailScreen(recipe: recipe));
@@ -426,20 +426,27 @@ class ClientHomeScreen extends StatelessWidget {
                 Positioned(
                   top: 15.h,
                   right: 15.w,
-                  child: Container(
-                    padding: EdgeInsets.all(8.w),
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      (recipe.isFavorite ?? false)
-                          ? Icons.star
-                          : Icons.star_border,
-                      color: (recipe.isFavorite ?? false)
-                          ? const Color(0xFFFF8FA3)
-                          : Colors.black87,
-                      size: 20.sp,
+                  child: GestureDetector(
+                    onTap: () {
+                      if (recipe.id != null) {
+                        controller.toggleFavorite(recipe.id!);
+                      }
+                    },
+                    child: Container(
+                      padding: EdgeInsets.all(8.w),
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        (recipe.isFavorite ?? false)
+                            ? Icons.star
+                            : Icons.star_border,
+                        color: (recipe.isFavorite ?? false)
+                            ? const Color(0xFFFF8FA3)
+                            : Colors.black87,
+                        size: 20.sp,
+                      ),
                     ),
                   ),
                 ),
