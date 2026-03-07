@@ -22,172 +22,187 @@ class ClientHomeScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: const Color(0xFFFFF3F4), // Light pink background
-      body: Stack(
-        children: [
-          SingleChildScrollView(
-            child: Column(
-              children: [
-                // === Top Safe Area & Header ===
-                SizedBox(height: 50.h),
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 20.w),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "ASCELA",
-                        style: GoogleFonts.playfairDisplay(
-                          fontSize: 32.sp,
-                          color: const Color(0xFF2D2D2D),
-                          fontWeight: FontWeight.w400,
-                          letterSpacing: 1.0,
+      body: SizedBox.expand(
+        child: Stack(
+          children: [
+            SingleChildScrollView(
+              child: Column(
+                children: [
+                  // === Top Safe Area & Header ===
+                  SizedBox(height: 50.h),
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 20.w),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "ASCELA",
+                          style: GoogleFonts.playfairDisplay(
+                            fontSize: 32.sp,
+                            color: const Color(0xFF2D2D2D),
+                            fontWeight: FontWeight.w400,
+                            letterSpacing: 1.0,
+                          ),
                         ),
-                      ),
-                      // Container(
-                      //   width: 40.w,
-                      //   height: 40.w,
-                      //   decoration: BoxDecoration(
-                      //     color: Colors.white,
-                      //     shape: BoxShape.circle,
-                      //     boxShadow: [
-                      //       BoxShadow(
-                      //         color: Colors.black.withOpacity(0.05),
-                      //         blurRadius: 10,
-                      //         offset: const Offset(0, 2),
-                      //       ),
-                      //     ],
-                      //   ),
-                      //   child:
-                      GestureDetector(
-                        onTap: () {
-                          Get.toNamed(AppRoute.clientProfileScreen);
-                        },
-                        child: Image.asset(AppIcons.personIcon),
-                      ),
-                    ],
+                        // Container(
+                        //   width: 40.w,
+                        //   height: 40.w,
+                        //   decoration: BoxDecoration(
+                        //     color: Colors.white,
+                        //     shape: BoxShape.circle,
+                        //     boxShadow: [
+                        //       BoxShadow(
+                        //         color: Colors.black.withOpacity(0.05),
+                        //         blurRadius: 10,
+                        //         offset: const Offset(0, 2),
+                        //       ),
+                        //     ],
+                        //   ),
+                        //   child:
+                        GestureDetector(
+                          onTap: () {
+                            Get.toNamed(AppRoute.clientProfileScreen);
+                          },
+                          child: Image.asset(AppIcons.personIcon),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
 
-                SizedBox(height: 30.h),
+                  SizedBox(height: 30.h),
 
-                // === Phase Card Carousel ===
-                SizedBox(
-                  height: 177.h,
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      // PageView
-                      PageView.builder(
-                        controller: controller.pageController,
-                        onPageChanged: controller.onPageChanged,
-                        itemCount: controller.phases.length,
-                        itemBuilder: (context, index) {
-                          return _buildPhaseCard(controller.phases[index]);
-                        },
-                      ),
+                  // === Phase Card Carousel ===
+                  SizedBox(
+                    height: 177.h,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        // PageView
+                        PageView.builder(
+                          controller: controller.pageController,
+                          onPageChanged: controller.onPageChanged,
+                          itemCount: controller.phases.length,
+                          itemBuilder: (context, index) {
+                            return _buildPhaseCard(controller.phases[index]);
+                          },
+                        ),
 
-                      // Left Arrow
-                      Positioned(
-                        left: 10.w,
-                        child: GestureDetector(
-                          onTap: controller.previousPage,
-                          child: Image.asset(
-                            AppIcons.arrowBack,
-                            height: 40.h, // Slightly smaller for balance
-                            width: 40.h,
+                        // Left Arrow
+                        Positioned(
+                          left: 10.w,
+                          child: GestureDetector(
+                            onTap: controller.previousPage,
+                            child: Image.asset(
+                              AppIcons.arrowBack,
+                              height: 40.h, // Slightly smaller for balance
+                              width: 40.h,
+                            ),
                           ),
                         ),
-                      ),
 
-                      // Right Arrow
-                      Positioned(
-                        right: 10.w,
-                        child: GestureDetector(
-                          onTap: controller.nextPage,
-                          child: Image.asset(
-                            AppIcons.arrowForward,
-                            height: 40.h,
-                            width: 40.h,
+                        // Right Arrow
+                        Positioned(
+                          right: 10.w,
+                          child: GestureDetector(
+                            onTap: controller.nextPage,
+                            child: Image.asset(
+                              AppIcons.arrowForward,
+                              height: 40.h,
+                              width: 40.h,
+                            ),
                           ),
                         ),
-                      ),
 
-                      // Dots Indicator
-                      Positioned(
-                        bottom: 10.h,
-                        child: Obx(
-                          () => Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: List.generate(controller.phases.length, (
-                              index,
-                            ) {
-                              bool isActive =
-                                  controller.currentIndex.value == index;
-                              return AnimatedContainer(
-                                duration: const Duration(milliseconds: 300),
-                                margin: EdgeInsets.symmetric(horizontal: 4.w),
-                                width: isActive ? 35.w : 8.w,
-                                height: 8.w,
-                                decoration: BoxDecoration(
-                                  color: isActive
-                                      ? const Color(0xFFFF8FA3)
-                                      : Colors.black12, // Subtler dark
-                                  borderRadius: BorderRadius.circular(4.r),
-                                ),
-                              );
-                            }),
+                        // Dots Indicator
+                        Positioned(
+                          bottom: 10.h,
+                          child: Obx(
+                            () => Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: List.generate(
+                                controller.phases.length,
+                                (index) {
+                                  bool isActive =
+                                      controller.currentIndex.value == index;
+                                  return AnimatedContainer(
+                                    duration: const Duration(milliseconds: 300),
+                                    margin: EdgeInsets.symmetric(
+                                      horizontal: 4.w,
+                                    ),
+                                    width: isActive ? 35.w : 8.w,
+                                    height: 8.w,
+                                    decoration: BoxDecoration(
+                                      color: isActive
+                                          ? const Color(0xFFFF8FA3)
+                                          : Colors.black12, // Subtler dark
+                                      borderRadius: BorderRadius.circular(4.r),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
 
-                SizedBox(height: 25.h),
+                  SizedBox(height: 25.h),
 
-                // === Conditional: Current Phase Details Card ===
-                Obx(
-                  () => controller.cycleOverview.value?.currentPhaseInfo != null
-                      ? _buildPhaseDetailsCard(controller)
-                      : const SizedBox.shrink(),
-                ),
+                  // === Conditional: Current Phase Details Card ===
+                  Obx(
+                    () =>
+                        controller.cycleOverview.value?.currentPhaseInfo != null
+                        ? _buildPhaseDetailsCard(controller)
+                        : const SizedBox.shrink(),
+                  ),
 
-                // === Meal Categories Section ===
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 20.w),
-                  child: Obx(() {
-                    if (controller.isLoadingCycle.value) {
-                      return Padding(
-                        padding: EdgeInsets.symmetric(vertical: 20.h),
-                        child: const Center(child: CircularProgressIndicator()),
+                  // === Meal Categories Section ===
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 20.w),
+                    child: Obx(() {
+                      if (controller.isLoadingCycle.value) {
+                        return Padding(
+                          padding: EdgeInsets.symmetric(vertical: 20.h),
+                          child: const Center(
+                            child: CircularProgressIndicator(),
+                          ),
+                        );
+                      }
+                      if (controller.cycleOverview.value == null ||
+                          controller.cycleOverview.value!.recipes == null ||
+                          controller.cycleOverview.value!.recipes!.isEmpty) {
+                        return const Center(
+                          child: Text("No nutrition plan found"),
+                        );
+                      }
+
+                      final recipesMap =
+                          controller.cycleOverview.value!.recipes!;
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: recipesMap.keys.map((category) {
+                          return _buildRecipeCategory(
+                            category,
+                            recipesMap[category],
+                            controller,
+                          );
+                        }).toList(),
                       );
-                    }
-                    if (controller.cycleOverview.value == null || 
-                        controller.cycleOverview.value!.recipes == null || 
-                        controller.cycleOverview.value!.recipes!.isEmpty) {
-                      return const Center(child: Text("No nutrition plan found"));
-                    }
-                    
-                    final recipesMap = controller.cycleOverview.value!.recipes!;
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: recipesMap.keys.map((category) {
-                        return _buildRecipeCategory(category, recipesMap[category], controller);
-                      }).toList(),
-                    );
-                  }),
-                ),
-                SizedBox(height: 200.h), // Bottom padding for navbar
-              ],
+                    }),
+                  ),
+                  SizedBox(height: 200.h), // Bottom padding for navbar
+                ],
+              ),
             ),
-          ),
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: ClientNavBar(selectedIndex: 0),
-          ),
-        ],
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: ClientNavBar(selectedIndex: 0),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -234,7 +249,11 @@ class ClientHomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildRecipeCategory(String categoryName, List<RecipeModel>? recipes, ClientHomeController controller) {
+  Widget _buildRecipeCategory(
+    String categoryName,
+    List<RecipeModel>? recipes,
+    ClientHomeController controller,
+  ) {
     if (recipes == null || recipes.isEmpty) return const SizedBox.shrink();
 
     return Column(
@@ -303,10 +322,7 @@ class ClientHomeScreen extends StatelessWidget {
                       height: 200.h,
                       width: double.infinity,
                       color: Colors.grey[200],
-                      child: const Icon(
-                        Icons.broken_image,
-                        color: Colors.grey,
-                      ),
+                      child: const Icon(Icons.broken_image, color: Colors.grey),
                     ),
                   ),
                 ),
