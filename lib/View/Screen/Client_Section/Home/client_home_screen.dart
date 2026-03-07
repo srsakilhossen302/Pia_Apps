@@ -25,8 +25,15 @@ class ClientHomeScreen extends StatelessWidget {
       body: SizedBox.expand(
         child: Stack(
           children: [
-            SingleChildScrollView(
-              child: Column(
+            RefreshIndicator(
+              onRefresh: () async {
+                await controller.getCycleOverview();
+              },
+              color: const Color(0xFFFF8FA3),
+              backgroundColor: Colors.white,
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                child: Column(
                 children: [
                   // === Top Safe Area & Header ===
                   SizedBox(height: 50.h),
@@ -71,91 +78,93 @@ class ClientHomeScreen extends StatelessWidget {
 
                   SizedBox(height: 30.h),
 
-                  // === Phase Card Carousel ===
-                  SizedBox(
-                    height: 177.h,
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        // PageView
-                        PageView.builder(
-                          controller: controller.pageController,
-                          onPageChanged: controller.onPageChanged,
-                          itemCount: controller.phases.length,
-                          itemBuilder: (context, index) {
-                            return _buildPhaseCard(controller.phases[index]);
-                          },
-                        ),
+                  // === Phase Info & Educational Content section ===
+                  Obx(() {
+                    final data = controller.cycleOverview.value;
+                    if (data == null) return const SizedBox.shrink();
 
-                        // Left Arrow
-                        Positioned(
-                          left: 10.w,
-                          child: GestureDetector(
-                            onTap: controller.previousPage,
-                            child: Image.asset(
-                              AppIcons.arrowBack,
-                              height: 40.h, // Slightly smaller for balance
-                              width: 40.h,
-                            ),
-                          ),
-                        ),
+                    bool isComplete = data.currentPhaseInfo?.isHealthSetupComplete == true;
 
-                        // Right Arrow
-                        Positioned(
-                          right: 10.w,
-                          child: GestureDetector(
-                            onTap: controller.nextPage,
-                            child: Image.asset(
-                              AppIcons.arrowForward,
-                              height: 40.h,
-                              width: 40.h,
-                            ),
-                          ),
-                        ),
+                    if (isComplete) {
+                       EducationalContent? currentEdu;
+                       if (data.educationalContent != null && data.educationalContent!.isNotEmpty && data.currentPhaseInfo?.phase != null) {
+                         currentEdu = data.educationalContent!.firstWhere(
+                           (e) => e.phase?.toLowerCase() == data.currentPhaseInfo!.phase!.toLowerCase(),
+                           orElse: () => data.educationalContent!.first,
+                         );
+                       }
+                       return Column(
+                         children: [
+                           if (currentEdu != null) _buildEducationalCard(currentEdu),
+                           SizedBox(height: 25.h),
+                           _buildPhaseDetailsCard(controller),
+                         ],
+                       );
+                    } else {
+                       if (data.educationalContent == null || data.educationalContent!.isEmpty) {
+                           return const SizedBox.shrink();
+                       }
 
-                        // Dots Indicator
-                        Positioned(
-                          bottom: 10.h,
-                          child: Obx(
-                            () => Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: List.generate(
-                                controller.phases.length,
-                                (index) {
-                                  bool isActive =
-                                      controller.currentIndex.value == index;
-                                  return AnimatedContainer(
-                                    duration: const Duration(milliseconds: 300),
-                                    margin: EdgeInsets.symmetric(
-                                      horizontal: 4.w,
-                                    ),
-                                    width: isActive ? 35.w : 8.w,
-                                    height: 8.w,
-                                    decoration: BoxDecoration(
-                                      color: isActive
-                                          ? const Color(0xFFFF8FA3)
-                                          : Colors.black12, // Subtler dark
-                                      borderRadius: BorderRadius.circular(4.r),
-                                    ),
-                                  );
-                                },
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  SizedBox(height: 25.h),
-
-                  // === Conditional: Current Phase Details Card ===
-                  Obx(
-                    () =>
-                        controller.cycleOverview.value?.currentPhaseInfo != null
-                        ? _buildPhaseDetailsCard(controller)
-                        : const SizedBox.shrink(),
-                  ),
+                       return SizedBox(
+                         height: 177.h,
+                         child: Stack(
+                           alignment: Alignment.center,
+                           children: [
+                             PageView.builder(
+                               controller: controller.pageController,
+                               onPageChanged: (index) {
+                                  controller.currentIndex.value = index;
+                                  final selectedPhase = data.educationalContent![index].phase;
+                                  if (selectedPhase != null) {
+                                      controller.getCycleOverview(phase: selectedPhase);
+                                  }
+                               },
+                               itemCount: data.educationalContent!.length,
+                               itemBuilder: (context, index) {
+                                  return _buildEducationalCard(data.educationalContent![index]);
+                               },
+                             ),
+                             Positioned(
+                               left: 10.w,
+                               child: GestureDetector(
+                                 onTap: controller.previousPage,
+                                 child: Image.asset(AppIcons.arrowBack, height: 40.h, width: 40.h),
+                               ),
+                             ),
+                             Positioned(
+                               right: 10.w,
+                               child: GestureDetector(
+                                 onTap: controller.nextPage,
+                                 child: Image.asset(AppIcons.arrowForward, height: 40.h, width: 40.h),
+                               ),
+                             ),
+                             Positioned(
+                               bottom: 10.h,
+                               child: Obx(() => Row(
+                                 mainAxisAlignment: MainAxisAlignment.center,
+                                 children: List.generate(
+                                   data.educationalContent!.length,
+                                   (index) {
+                                      bool isActive = controller.currentIndex.value == index;
+                                      return AnimatedContainer(
+                                        duration: const Duration(milliseconds: 300),
+                                        margin: EdgeInsets.symmetric(horizontal: 4.w),
+                                        width: isActive ? 35.w : 8.w,
+                                        height: 8.w,
+                                        decoration: BoxDecoration(
+                                          color: isActive ? const Color(0xFFFF8FA3) : Colors.black12,
+                                          borderRadius: BorderRadius.circular(4.r),
+                                        ),
+                                      );
+                                   }
+                                 )
+                               ))
+                             )
+                           ]
+                         )
+                       );
+                    }
+                  }),
 
                   // === Meal Categories Section ===
                   Padding(
@@ -169,9 +178,15 @@ class ClientHomeScreen extends StatelessWidget {
                           ),
                         );
                       }
-                      if (controller.cycleOverview.value == null ||
-                          controller.cycleOverview.value!.recipes == null ||
-                          controller.cycleOverview.value!.recipes!.isEmpty) {
+                      final cycleVal = controller.cycleOverview.value;
+                      if (cycleVal == null || cycleVal.recipes == null) {
+                        return const Center(child: Text("No nutrition plan found"));
+                      }
+                      
+                      bool isRecipesEmpty = cycleVal.recipes!.isEmpty || 
+                                          cycleVal.recipes!.values.every((list) => list.isEmpty);
+
+                      if (isRecipesEmpty) {
                         return const Center(
                           child: Text("No nutrition plan found"),
                         );
@@ -195,6 +210,7 @@ class ClientHomeScreen extends StatelessWidget {
                 ],
               ),
             ),
+            ),
             Positioned(
               bottom: 0,
               left: 0,
@@ -207,10 +223,33 @@ class ClientHomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildPhaseCard(ClientPhaseModel phase) {
+  Color _getPhaseColor(String? phase) {
+    if (phase == null) return const Color(0xFFFADADF);
+    switch (phase.toLowerCase()) {
+      case 'menstrual':
+      case 'luteal':
+      case 'follicular': 
+      case 'ovulation':
+      default:
+        return const Color(0xFFFADADF);
+    }
+  }
+
+  String _getPhaseIcon(String? phase) {
+    if (phase == null) return AppIcons.MENSTRUAL;
+    switch (phase.toLowerCase()) {
+      case 'luteal': return AppIcons.LUTEAL;
+      case 'menstrual': return AppIcons.MENSTRUAL;
+      case 'follicular': return AppIcons.FOLLICULAR;
+      case 'ovulation': return AppIcons.OVULATION;
+      default: return AppIcons.MENSTRUAL;
+    }
+  }
+
+  Widget _buildEducationalCard(EducationalContent phaseEdu) {
     return Container(
       width: double.infinity,
-      decoration: BoxDecoration(color: phase.backgroundColor),
+      decoration: BoxDecoration(color: _getPhaseColor(phaseEdu.phase)),
       padding: EdgeInsets.symmetric(horizontal: 40.w),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -219,10 +258,10 @@ class ClientHomeScreen extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Image.asset(phase.icon, height: 50.h, width: 50.w),
+              Image.asset(_getPhaseIcon(phaseEdu.phase), height: 50.h, width: 50.w),
               SizedBox(width: 9.w),
               Text(
-                phase.title,
+                (phaseEdu.phase ?? "").toUpperCase(),
                 style: GoogleFonts.playfairDisplay(
                   fontSize: 26.sp,
                   fontWeight: FontWeight.w400,
@@ -234,7 +273,7 @@ class ClientHomeScreen extends StatelessWidget {
           ),
           SizedBox(height: 12.h),
           Text(
-            phase.description,
+            phaseEdu.description ?? "",
             textAlign: TextAlign.center,
             style: GoogleFonts.lato(
               fontSize: 15.sp,
