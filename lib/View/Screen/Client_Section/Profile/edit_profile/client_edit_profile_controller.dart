@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -31,10 +32,10 @@ class ClientEditProfileController extends GetxController {
     birthdayController = TextEditingController(text: "");
   }
 
-  Future<void> pickImage() async {
+  Future<void> pickImage(ImageSource source) async {
     try {
       final pickedFile = await picker.pickImage(
-        source: ImageSource.gallery,
+        source: source,
         imageQuality: 80,
       );
       if (pickedFile != null) {
@@ -52,14 +53,28 @@ class ClientEditProfileController extends GetxController {
         SharedPreferenceValue.token,
       );
 
-      final Map<String, dynamic> body = {};
-      if (nameController.text.isNotEmpty)
-        body["name"] = nameController.text.trim();
+      if (token == null || token.isEmpty) {
+        ToastHelper.showError("Authentication token is missing.");
+        return;
+      }
 
+      // Preparation of text data according to Postman screenshot
+      final Map<String, dynamic> dataMap = {};
+      if (nameController.text.isNotEmpty) {
+        dataMap["name"] = nameController.text.trim();
+      }
+      // Add other fields if required by your API inside the data object
+      // dataMap["phone"] = phoneController.text.trim(); 
+
+      final Map<String, dynamic> body = {
+        "data": jsonEncode(dataMap),
+      };
+
+      // Handling the image file with key 'Images' as per Postman
       if (selectedImage.value != null) {
-        body["images"] = MultipartFile(
-          selectedImage.value!,
-          filename: selectedImage.value!.path.split('/').last,
+        body["Images"] = MultipartFile(
+          selectedImage.value!.readAsBytesSync(),
+          filename: selectedImage.value!.path.split(Platform.isWindows ? '\\' : '/').last,
         );
       }
 
@@ -68,20 +83,31 @@ class ClientEditProfileController extends GetxController {
       final response = await GetConnect().patch(
         "${ApiConstant.baseUrl}${ApiConstant.userProfile}",
         formData,
-        headers: {'Authorization': 'Bearer $token'},
+        headers: {
+          'Authorization': 'Bearer $token',
+          // GetConnect handles Content-Type for FormData automatically
+        },
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         ToastHelper.showSuccess(
-          response.body['message'] ?? "Profile updated successfully",
+          (response.body != null && response.body['message'] != null)
+              ? response.body['message']
+              : "Profile updated successfully",
         );
-        profileController
-            .getUserProfile(); // refresh the profile data in the background
+        profileController.getUserProfile(); // Refresh profile in background
         Get.back();
       } else {
-        ToastHelper.showError(
-          response.body['message'] ?? "Failed to update profile",
-        );
+        // Detailed error message for debugging
+        String errorMsg = "Failed to update profile";
+        if (response.body != null && response.body['message'] != null) {
+          errorMsg = response.body['message'];
+        } else if (response.statusText != null) {
+          errorMsg = response.statusText!;
+        }
+        
+        ToastHelper.showError("Error (${response.statusCode}): $errorMsg");
+        print("Update Profile Error: ${response.statusCode} - ${response.body}");
       }
     } catch (e) {
       ToastHelper.showError("Network error: $e");

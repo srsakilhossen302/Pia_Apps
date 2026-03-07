@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../../../../service/api_url.dart';
 import 'client_edit_profile_controller.dart';
 
@@ -86,7 +87,7 @@ class ClientEditProfileScreen extends StatelessWidget {
                       bottom: 5.h,
                       right: 5.w,
                       child: GestureDetector(
-                        onTap: controller.pickImage,
+                        onTap: () => _showImagePicker(context),
                         child: Container(
                           padding: EdgeInsets.all(6.w),
                           decoration: const BoxDecoration(
@@ -221,6 +222,51 @@ class ClientEditProfileScreen extends StatelessWidget {
           ),
         );
       }),
+    );
+  }
+
+  void _showImagePicker(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+      ),
+      builder: (BuildContext context) {
+        return SafeArea(
+          child: Wrap(
+            children: [
+              Padding(
+                padding: EdgeInsets.all(20.w),
+                child: Text(
+                  "Choose Profile Picture",
+                  style: GoogleFonts.playfairDisplay(
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+              ListTile(
+                leading: const Icon(Icons.camera_alt, color: Color(0xFFF48FB1)),
+                title: Text('Take a Photo', style: GoogleFonts.lato()),
+                onTap: () {
+                  Navigator.pop(context);
+                  controller.pickImage(ImageSource.camera);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_library, color: Color(0xFFF48FB1)),
+                title: Text('Choose from Gallery', style: GoogleFonts.lato()),
+                onTap: () {
+                  Navigator.pop(context);
+                  controller.pickImage(ImageSource.gallery);
+                },
+              ),
+              SizedBox(height: 20.h),
+            ],
+          ),
+        );
+      },
     );
   }
 

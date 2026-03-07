@@ -66,44 +66,26 @@ class ClientProfileScreen extends StatelessWidget {
             children: [
               // === Profile Header ===
               SizedBox(height: 20.h),
-              Stack(
-                children: [
-                  Container(
-                    width: 100.w,
-                    height: 100.w,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 3),
-                      image: DecorationImage(
-                        image: NetworkImage(profileImage),
-                        fit: BoxFit.cover,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
-                          blurRadius: 10,
-                          offset: const Offset(0, 5),
-                        ),
-                      ],
+              Center(
+                child: Container(
+                  width: 100.w,
+                  height: 100.w,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white, width: 3),
+                    image: DecorationImage(
+                      image: NetworkImage(profileImage),
+                      fit: BoxFit.cover,
                     ),
-                  ),
-                  Positioned(
-                    bottom: 0,
-                    right: 0,
-                    child: Container(
-                      padding: EdgeInsets.all(6.w),
-                      decoration: const BoxDecoration(
-                        color: Color(0xFFF48FB1),
-                        shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 10,
+                        offset: const Offset(0, 5),
                       ),
-                      child: Icon(
-                        Icons.camera_alt,
-                        color: Colors.white,
-                        size: 16.sp,
-                      ),
-                    ),
+                    ],
                   ),
-                ],
+                ),
               ),
               SizedBox(height: 15.h),
               Text(
