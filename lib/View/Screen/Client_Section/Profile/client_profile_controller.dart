@@ -67,7 +67,7 @@ class ClientProfileController extends GetxController {
   }
 
   void changePassword() {
-    // Navigate to change password
+    Get.toNamed(AppRoute.clientChangePasswordScreen);
   }
 
   void deleteAccount() {

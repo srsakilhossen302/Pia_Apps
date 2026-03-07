@@ -6,6 +6,7 @@ import '../../View/Screen/Client_Section/Favorites/client_favorites_screen.dart'
 import '../../View/Screen/Client_Section/Grocery/client_grocery_screen.dart';
 import '../../View/Screen/Client_Section/Profile/client_profile_screen.dart';
 import '../../View/Screen/Client_Section/Profile/edit_profile/client_edit_profile_screen.dart';
+import '../../View/Screen/Client_Section/Profile/change_password/change_password_screen.dart';
 import '../../View/Screen/Client_Section/Subscription/client_subscription_screen.dart';
 import '../../View/Screen/Client_Section/Payment/client_payment_screen.dart';
 
@@ -21,6 +22,7 @@ class AppRoute {
   static const String clientSubscriptionScreen = "/clientSubscriptionScreen";
   static const String clientPaymentScreen = "/clientPaymentScreen";
   static const String periodInfoScreen = "/periodInfoScreen";
+  static const String clientChangePasswordScreen = "/clientChangePasswordScreen";
 
   static List<GetPage> routes = [
     ///==================== Authentication  Routes ====================///
@@ -34,6 +36,10 @@ class AppRoute {
     GetPage(
       name: clientEditProfileScreen,
       page: () => ClientEditProfileScreen(),
+    ),
+    GetPage(
+      name: clientChangePasswordScreen,
+      page: () => ChangePasswordScreen(),
     ),
     GetPage(
       name: clientSubscriptionScreen,

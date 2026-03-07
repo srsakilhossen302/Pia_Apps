@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../Model/Client_Section/cycle_overview_model.dart';
 import '../../../../service/api_url.dart';
 import '../../../Widgets/custom_bottom_nav_bar.dart';
+import '../../../Widgets/recipe_card.dart';
 import '../Home/recipe_detail_screen.dart';
 import 'client_search_controller.dart';
 
@@ -301,7 +302,7 @@ class ClientSearchScreen extends StatelessWidget {
                       itemCount: controller.searchResults.length,
                       itemBuilder: (context, index) {
                         final recipe = controller.searchResults[index];
-                        return _buildSearchMealCard(context, recipe);
+                        return RecipeCard(recipe: recipe);
                       },
                     );
                   }),
@@ -320,190 +321,6 @@ class ClientSearchScreen extends StatelessWidget {
               child: ClientNavBar(selectedIndex: 2),
             ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildSearchMealCard(BuildContext context, RecipeModel recipe) {
-    return GestureDetector(
-      onTap: () {
-        // Navigate to Recipe Detail
-        Get.to(() => RecipeDetailScreen(recipe: recipe));
-      },
-      child: Container(
-        margin: EdgeInsets.only(bottom: 20.h),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20.r),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.03),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // === Image Header ===
-            Stack(
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.vertical(
-                    top: Radius.circular(20.r),
-                  ),
-                  child: Image.network(
-                    recipe.image != null
-                        ? (recipe.image!.startsWith('http')
-                              ? recipe.image!
-                              : "${ApiConstant.baseUrl}${recipe.image}")
-                        : 'https://via.placeholder.com/400',
-                    height: 160.h,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                    errorBuilder: (c, e, s) => Container(
-                      height: 160.h,
-                      color: Colors.grey[200],
-                      child: Center(
-                        child: Icon(Icons.broken_image, color: Colors.grey),
-                      ),
-                    ),
-                  ),
-                ),
-                // Top Left Badge (Icons)
-                Positioned(
-                  top: 15.h,
-                  left: 15.w,
-                  child: Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 8.w,
-                      vertical: 4.h,
-                    ),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF48FB1),
-                      borderRadius: BorderRadius.circular(20.r),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.spa, color: Colors.black87, size: 12.sp),
-                        SizedBox(width: 4.w),
-                        // Add another icon if needed to match "two droplets" look
-                        Icon(
-                          Icons.local_fire_department,
-                          color: Colors.black87,
-                          size: 12.sp,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                // Top Right Actions
-                Positioned(
-                  top: 15.h,
-                  right: 15.w,
-                  child: Row(
-                    children: [
-                      _buildCircleIcon(
-                        recipe.isFavorite == true
-                            ? Icons.star
-                            : Icons.star_border,
-                        color: recipe.isFavorite == true
-                            ? const Color(0xFFFF8FA3)
-                            : Colors.black87,
-                      ), // Star
-                      SizedBox(width: 8.w),
-                      _buildCircleIcon(
-                        recipe.isSaved == true
-                            ? Icons.bookmark
-                            : Icons.bookmark_border,
-                        color: recipe.isSaved == true
-                            ? const Color(0xFFFF8FA3)
-                            : Colors.black87,
-                      ), // Bookmark
-                    ],
-                  ),
-                ),
-              ],
-            ),
-
-            // === Content ===
-            Padding(
-              padding: EdgeInsets.all(16.w),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    (recipe.title ?? "").toUpperCase(),
-                    style: GoogleFonts.playfairDisplay(
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.w600,
-                      color: const Color(0xFF2D2D2D),
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                  SizedBox(height: 8.h),
-
-                  // Meta Info Row
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.access_time,
-                        size: 14.sp,
-                        color: Colors.black87,
-                      ),
-                      SizedBox(width: 4.w),
-                      Text(
-                        "${(recipe.prepTime ?? 0) + (recipe.cookTime ?? 0)}m",
-                        style: GoogleFonts.lato(
-                          fontSize: 12.sp,
-                          color: Colors.black87,
-                        ),
-                      ),
-                      SizedBox(width: 16.w),
-                      Icon(
-                        Icons.people_outline,
-                        size: 14.sp,
-                        color: Colors.black87,
-                      ),
-                      SizedBox(width: 4.w),
-                      Text(
-                        "${recipe.servings ?? 1}",
-                        style: GoogleFonts.lato(
-                          fontSize: 12.sp,
-                          color: Colors.black87,
-                        ),
-                      ),
-                      SizedBox(width: 16.w),
-                      Text(
-                        "${recipe.nutrition?.calories ?? 0} cal",
-                        style: GoogleFonts.playfairDisplay(
-                          fontSize: 12.sp,
-                          color: Colors.black87,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  SizedBox(height: 10.h),
-
-                  Text(
-                    recipe.description ?? "",
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.playfairDisplay(
-                      fontSize: 13.sp,
-                      color: Colors.grey[600],
-                      height: 1.4,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
