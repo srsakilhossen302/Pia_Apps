@@ -60,6 +60,7 @@ class CycleOverviewData {
 class CurrentPhaseInfo {
   final String? phase;
   final int? day;
+  final String? message;
   final String? nutrition;
   final String? wellness;
   final String? healthNotes;
@@ -67,10 +68,12 @@ class CurrentPhaseInfo {
   final int? daysUntilNextPhase;
   final int? phaseProgress;
   final bool? isHealthSetupComplete;
+  final String? image;
 
   CurrentPhaseInfo({
     this.phase,
     this.day,
+    this.message,
     this.nutrition,
     this.wellness,
     this.healthNotes,
@@ -78,12 +81,14 @@ class CurrentPhaseInfo {
     this.daysUntilNextPhase,
     this.phaseProgress,
     this.isHealthSetupComplete,
+    this.image,
   });
 
   factory CurrentPhaseInfo.fromJson(Map<String, dynamic> json) {
     return CurrentPhaseInfo(
       phase: json['phase'],
       day: json['day'],
+      message: json['message'],
       nutrition: json['nutrition'],
       wellness: json['wellness'],
       healthNotes: json['healthNotes'],
@@ -91,6 +96,7 @@ class CurrentPhaseInfo {
       daysUntilNextPhase: json['daysUntilNextPhase'],
       phaseProgress: json['phaseProgress'],
       isHealthSetupComplete: json['isHealthSetupComplete'],
+      image: json['image'],
     );
   }
 }

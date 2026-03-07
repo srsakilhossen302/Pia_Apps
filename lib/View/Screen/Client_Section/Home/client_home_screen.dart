@@ -11,6 +11,7 @@ import '../../../../service/api_url.dart';
 import '../../../Widgets/custom_bottom_nav_bar.dart';
 import 'client_home_controller.dart';
 import 'recipe_detail_screen.dart';
+import '../../Health_Setup/Period_Start/period_start_screen.dart';
 
 class ClientHomeScreen extends StatelessWidget {
   const ClientHomeScreen({super.key});
@@ -105,63 +106,119 @@ class ClientHomeScreen extends StatelessWidget {
                            return const SizedBox.shrink();
                        }
 
-                       return SizedBox(
-                         height: 177.h,
-                         child: Stack(
-                           alignment: Alignment.center,
-                           children: [
-                             PageView.builder(
-                               controller: controller.pageController,
-                               onPageChanged: (index) {
-                                  controller.currentIndex.value = index;
-                                  final selectedPhase = data.educationalContent![index].phase;
-                                  if (selectedPhase != null) {
-                                      controller.getCycleOverview(phase: selectedPhase);
-                                  }
-                               },
-                               itemCount: data.educationalContent!.length,
-                               itemBuilder: (context, index) {
-                                  return _buildEducationalCard(data.educationalContent![index]);
-                               },
-                             ),
-                             Positioned(
-                               left: 10.w,
-                               child: GestureDetector(
-                                 onTap: controller.previousPage,
-                                 child: Image.asset(AppIcons.arrowBack, height: 40.h, width: 40.h),
-                               ),
-                             ),
-                             Positioned(
-                               right: 10.w,
-                               child: GestureDetector(
-                                 onTap: controller.nextPage,
-                                 child: Image.asset(AppIcons.arrowForward, height: 40.h, width: 40.h),
-                               ),
-                             ),
-                             Positioned(
-                               bottom: 10.h,
-                               child: Obx(() => Row(
-                                 mainAxisAlignment: MainAxisAlignment.center,
-                                 children: List.generate(
-                                   data.educationalContent!.length,
-                                   (index) {
-                                      bool isActive = controller.currentIndex.value == index;
-                                      return AnimatedContainer(
-                                        duration: const Duration(milliseconds: 300),
-                                        margin: EdgeInsets.symmetric(horizontal: 4.w),
-                                        width: isActive ? 35.w : 8.w,
-                                        height: 8.w,
-                                        decoration: BoxDecoration(
-                                          color: isActive ? const Color(0xFFFF8FA3) : Colors.black12,
-                                          borderRadius: BorderRadius.circular(4.r),
-                                        ),
-                                      );
-                                   }
+                       return Column(
+                         children: [
+                           SizedBox(
+                             height: 177.h,
+                             child: Stack(
+                               alignment: Alignment.center,
+                               children: [
+                                 PageView.builder(
+                                   controller: controller.pageController,
+                                   onPageChanged: (index) {
+                                      controller.currentIndex.value = index;
+                                      final selectedPhase = data.educationalContent![index].phase;
+                                      if (selectedPhase != null) {
+                                          controller.getCycleOverview(phase: selectedPhase);
+                                      }
+                                   },
+                                   itemCount: data.educationalContent!.length,
+                                   itemBuilder: (context, index) {
+                                      return _buildEducationalCard(data.educationalContent![index]);
+                                   },
+                                 ),
+                                 Positioned(
+                                   left: 10.w,
+                                   child: GestureDetector(
+                                     onTap: controller.previousPage,
+                                     child: Image.asset(AppIcons.arrowBack, height: 40.h, width: 40.h),
+                                   ),
+                                 ),
+                                 Positioned(
+                                   right: 10.w,
+                                   child: GestureDetector(
+                                     onTap: controller.nextPage,
+                                     child: Image.asset(AppIcons.arrowForward, height: 40.h, width: 40.h),
+                                   ),
+                                 ),
+                                 Positioned(
+                                   bottom: 10.h,
+                                   child: Obx(() => Row(
+                                     mainAxisAlignment: MainAxisAlignment.center,
+                                     children: List.generate(
+                                       data.educationalContent!.length,
+                                       (index) {
+                                          bool isActive = controller.currentIndex.value == index;
+                                          return AnimatedContainer(
+                                            duration: const Duration(milliseconds: 300),
+                                            margin: EdgeInsets.symmetric(horizontal: 4.w),
+                                            width: isActive ? 35.w : 8.w,
+                                            height: 8.w,
+                                            decoration: BoxDecoration(
+                                              color: isActive ? const Color(0xFFFF8FA3) : Colors.black12,
+                                              borderRadius: BorderRadius.circular(4.r),
+                                            ),
+                                          );
+                                       }
+                                     )
+                                   ))
                                  )
-                               ))
+                               ]
                              )
-                           ]
-                         )
+                           ),
+                           SizedBox(height: 25.h),
+                           Padding(
+                             padding: EdgeInsets.symmetric(horizontal: 20.w),
+                             child: GestureDetector(
+                               onTap: () {
+                                 Get.to(() => PeriodStartScreen());
+                               },
+                               child: Container(
+                                 width: double.infinity,
+                                 padding: EdgeInsets.symmetric(vertical: 20.h, horizontal: 20.w),
+                                 decoration: BoxDecoration(
+                                   color: Colors.white,
+                                   borderRadius: BorderRadius.circular(24.r),
+                                   border: Border.all(color: const Color(0xFFFF8FA3), width: 1.5),
+                                   boxShadow: [
+                                     BoxShadow(
+                                       color: Colors.black.withOpacity(0.04),
+                                       blurRadius: 20,
+                                       spreadRadius: 0,
+                                       offset: const Offset(0, 8),
+                                     ),
+                                   ],
+                                 ),
+                                 child: Column(
+                                   children: [
+                                     Icon(Icons.health_and_safety_outlined, color: const Color(0xFFFF8FA3), size: 36.sp),
+                                     SizedBox(height: 12.h),
+                                     Text(
+                                       "Set Up Your Health Profile",
+                                       textAlign: TextAlign.center,
+                                       style: GoogleFonts.playfairDisplay(
+                                         fontSize: 20.sp,
+                                         fontWeight: FontWeight.w600,
+                                         color: const Color(0xFF333333),
+                                       ),
+                                     ),
+                                     SizedBox(height: 8.h),
+                                     Text(
+                                       "Complete your health profile to get customized insights and accurate phase predictions.",
+                                       textAlign: TextAlign.center,
+                                       style: GoogleFonts.lato(
+                                         fontSize: 14.sp,
+                                         color: Colors.grey[600],
+                                         height: 1.4,
+                                       ),
+                                     ),
+                                   ],
+                                 ),
+                               ),
+                             ),
+                           ),
+                           SizedBox(height: 25.h),
+                         ],
                        );
                     }
                   }),

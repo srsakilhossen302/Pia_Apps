@@ -15,4 +15,6 @@ class ApiConstant {
   static const String recipe = "$apiVersion/recipe";
   static const String userProfile = "$apiVersion/user/profile";
   static const String cycleOverview = "$apiVersion/cycle/overview";
+  static const String cycleCalendar = "$apiVersion/cycle/calendar";
+  static const String cyclePhase = "$apiVersion/cycle/phase";
 }
