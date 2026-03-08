@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import '../../../../Core/AppRoute/app_route.dart';
 import '../../../../service/api_url.dart';
 import 'client_profile_controller.dart';
@@ -15,30 +16,34 @@ class ClientProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFFF3F4), // Light pink background
+      backgroundColor: const Color(0xFFFFF6F7), // Soft pink background
       appBar: AppBar(
         backgroundColor: Colors.transparent,
-        surfaceTintColor: Colors.transparent,
         elevation: 0,
-        leading: IconButton(
-          icon: Container(
-            padding: EdgeInsets.all(8.w),
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle,
+        scrolledUnderElevation: 0,
+        leadingWidth: 70.w,
+        leading: Padding(
+          padding: EdgeInsets.only(left: 20.w),
+          child: GestureDetector(
+            onTap: () => Get.back(),
+            child: Container(
+              padding: EdgeInsets.all(8.w),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.arrow_back, color: Colors.black, size: 20.sp),
             ),
-            child: Icon(Icons.arrow_back, color: Colors.black, size: 20.sp),
           ),
-          onPressed: () => Get.back(),
         ),
         centerTitle: true,
         title: Text(
           "PROFILE",
           style: GoogleFonts.playfairDisplay(
-            fontSize: 18.sp,
-            fontWeight: FontWeight.w600,
-            color: Colors.black87,
-            letterSpacing: 1.5,
+            fontSize: 22.sp,
+            fontWeight: FontWeight.w700,
+            color: const Color(0xFF2D2D2D),
+            letterSpacing: 1.2,
           ),
         ),
       ),
@@ -56,70 +61,88 @@ class ClientProfileScreen extends StatelessWidget {
 
         String profileImage = user.profile != null
             ? (user.profile!.startsWith('http')
-                  ? user.profile!
-                  : "${ApiConstant.baseUrl}${user.profile}")
+                ? user.profile!
+                : "${ApiConstant.baseUrl}${user.profile}")
             : 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200';
 
         return SingleChildScrollView(
-          padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
+          padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 15.h),
           child: Column(
             children: [
               // === Profile Header ===
-              SizedBox(height: 20.h),
               Center(
-                child: Container(
-                  width: 100.w,
-                  height: 100.w,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white, width: 3),
-                    image: DecorationImage(
-                      image: NetworkImage(profileImage),
-                      fit: BoxFit.cover,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 10,
-                        offset: const Offset(0, 5),
+                child: Stack(
+                  children: [
+                    Container(
+                      width: 120.w,
+                      height: 120.w,
+                      padding: EdgeInsets.all(4.w),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white, width: 2),
                       ),
-                    ],
-                  ),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          image: DecorationImage(
+                            image: NetworkImage(profileImage),
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      bottom: 5.h,
+                      right: 5.w,
+                      child: GestureDetector(
+                        onTap: () => controller.pickProfileImage(Icons.camera_alt as dynamic), // Just a placeholder for logic
+                        child: Container(
+                          padding: EdgeInsets.all(8.w),
+                          decoration: const BoxDecoration(
+                            color: Color(0xFFF48FB1),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(Icons.camera_alt, color: Colors.white, size: 16.sp),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              SizedBox(height: 15.h),
+              SizedBox(height: 20.h),
               Text(
-                user.name ?? "N/A",
+                user.name ?? "Sarah Johnson",
                 style: GoogleFonts.playfairDisplay(
-                  fontSize: 22.sp,
+                  fontSize: 24.sp,
                   fontWeight: FontWeight.w700,
                   color: const Color(0xFF2D2D2D),
                 ),
               ),
-              SizedBox(height: 5.h),
+              SizedBox(height: 4.h),
               Text(
-                (user.role ?? "").toUpperCase(),
+                "FOLLICULAR PHASE", // Mocking phase for now as per image
                 style: GoogleFonts.lato(
                   fontSize: 12.sp,
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w800,
                   color: const Color(0xFFF48FB1),
-                  letterSpacing: 1.0,
+                  letterSpacing: 1.5,
                 ),
               ),
 
-              SizedBox(height: 30.h),
+              SizedBox(height: 35.h),
 
               // === Personal Information Card ===
               Container(
-                padding: EdgeInsets.all(20.w),
+                width: double.infinity,
+                padding: EdgeInsets.all(24.w),
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(20.r),
+                  borderRadius: BorderRadius.circular(25.r),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.02),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
+                      blurRadius: 15,
+                      offset: const Offset(0, 10),
                     ),
                   ],
                 ),
@@ -130,63 +153,49 @@ class ClientProfileScreen extends StatelessWidget {
                       "PERSONAL INFORMATION",
                       style: GoogleFonts.playfairDisplay(
                         fontSize: 12.sp,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.grey[800],
-                        letterSpacing: 0.5,
+                        fontWeight: FontWeight.w800,
+                        color: const Color(0xFF2D2D2D),
+                        letterSpacing: 1.0,
                       ),
                     ),
-                    SizedBox(height: 20.h),
-                    _buildInfoRow(
-                      Icons.email_outlined,
-                      "EMAIL",
-                      user.email ?? "N/A",
+                    SizedBox(height: 24.h),
+                    _buildInfoItem(
+                      icon: Icons.email_outlined,
+                      label: "EMAIL",
+                      value: user.email ?? "N/A",
                     ),
-                    _buildDivider(),
-                    _buildInfoRow(
-                      Icons.phone_outlined,
-                      "PHONE",
-                      user.phone ?? "N/A",
+                    _buildInfoItem(
+                      icon: Icons.cake_outlined,
+                      label: "BIRTHDAY",
+                      value: user.dateOfBirth != null 
+                          ? DateFormat('MMMM dd, yyyy').format(user.dateOfBirth!) 
+                          : "N/A",
                     ),
-                    _buildDivider(),
-                    _buildInfoRow(
-                      Icons.verified_user_outlined,
-                      "SUBSCRIPTION STATUS",
-                      (user.subscribe ?? false)
-                          ? "Subscribed"
-                          : "Not Subscribed",
-                      onTap: () {
-                        Get.toNamed(AppRoute.clientSubscriptionScreen);
-                      },
-                      isAction: true, // Add identifier arrow if needed
+                    _buildInfoItem(
+                      icon: Icons.verified_user_outlined,
+                      label: "SUBSCRIPTION STATUS",
+                      value: (user.subscribe ?? false) ? "Premium Plan" : "Free Plan",
+                      onTap: () => Get.toNamed(AppRoute.clientSubscriptionScreen),
                     ),
-                    _buildDivider(),
-                    _buildInfoRow(
-                      Icons.favorite_border,
-                      "HEALTH PROFILE",
-                      "Step Up Your Health Profile",
-                      isAction: true,
-                      onTap: () {
-                        Get.to(() => PeriodStartScreen());
-                      },
+                    _buildInfoItem(
+                      icon: Icons.favorite_border,
+                      label: "HEALTH PROFILE",
+                      value: "Step Up Your Health Profile",
+                      onTap: () => Get.to(() => PeriodStartScreen()),
                     ),
-                    _buildDivider(),
-                    // Apple Health Switch
+                    
+                    // Apple Health
                     Row(
                       children: [
                         Container(
-                          width: 40.w,
-                          height: 40.w,
+                          padding: EdgeInsets.all(10.w),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFFFF0F3),
-                            borderRadius: BorderRadius.circular(10.r),
+                            color: const Color(0xFFFFF1F4),
+                            borderRadius: BorderRadius.circular(12.r),
                           ),
-                          child: Icon(
-                            Icons.watch,
-                            color: const Color(0xFFF48FB1),
-                            size: 20.sp,
-                          ),
+                          child: Icon(Icons.watch, color: const Color(0xFFF48FB1), size: 18.sp),
                         ),
-                        SizedBox(width: 15.w),
+                        SizedBox(width: 16.w),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -204,19 +213,19 @@ class ClientProfileScreen extends StatelessWidget {
                                 style: GoogleFonts.lato(
                                   fontSize: 11.sp,
                                   color: const Color(0xFFF48FB1),
+                                  fontWeight: FontWeight.w500,
                                 ),
                               ),
                             ],
                           ),
                         ),
-                        Obx(
-                          () => Switch(
-                            value: controller.isHealthSyncEnabled.value,
-                            onChanged: controller.toggleHealthSync,
-                            activeThumbColor: Colors.white,
-                            activeTrackColor: const Color(0xFFF48FB1),
-                          ),
-                        ),
+                        Obx(() => Switch(
+                          value: controller.isHealthSyncEnabled.value,
+                          onChanged: controller.toggleHealthSync,
+                          activeColor: const Color(0xFFF48FB1),
+                          activeTrackColor: const Color(0xFFF48FB1).withOpacity(0.3),
+                          inactiveThumbColor: Colors.white,
+                        )),
                       ],
                     ),
                   ],
@@ -228,23 +237,23 @@ class ClientProfileScreen extends StatelessWidget {
               // === Edit Profile Button ===
               SizedBox(
                 width: double.infinity,
-                height: 50.h,
+                height: 52.h,
                 child: ElevatedButton(
                   onPressed: controller.editProfile,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFF48FB1),
                     elevation: 0,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(25.r),
+                      borderRadius: BorderRadius.circular(15.r),
                     ),
                   ),
                   child: Text(
                     "EDIT PROFILE",
                     style: GoogleFonts.lato(
                       fontSize: 14.sp,
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w700,
                       color: Colors.white,
-                      letterSpacing: 1.0,
+                      letterSpacing: 1.2,
                     ),
                   ),
                 ),
@@ -254,15 +263,16 @@ class ClientProfileScreen extends StatelessWidget {
 
               // === Account Actions Card ===
               Container(
-                padding: EdgeInsets.all(20.w),
+                width: double.infinity,
+                padding: EdgeInsets.all(24.w),
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(20.r),
+                  borderRadius: BorderRadius.circular(25.r),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.02),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
+                      blurRadius: 15,
+                      offset: const Offset(0, 10),
                     ),
                   ],
                 ),
@@ -273,21 +283,20 @@ class ClientProfileScreen extends StatelessWidget {
                       "ACCOUNT ACTIONS",
                       style: GoogleFonts.playfairDisplay(
                         fontSize: 12.sp,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.grey[800],
-                        letterSpacing: 0.5,
+                        fontWeight: FontWeight.w800,
+                        color: const Color(0xFF2D2D2D),
+                        letterSpacing: 1.0,
                       ),
                     ),
                     SizedBox(height: 20.h),
-                    _buildActionRow(
-                      Icons.lock_outline,
-                      "Change Password",
+                    _buildActionItem(
+                      icon: Icons.lock_outline,
+                      label: "Change Password",
                       onTap: controller.changePassword,
                     ),
-                    _buildDivider(),
-                    _buildActionRow(
-                      Icons.delete_outline,
-                      "Delete Account",
+                    _buildActionItem(
+                      icon: Icons.delete_outline,
+                      label: "Delete Account",
                       isDestructive: true,
                       onTap: controller.deleteAccount,
                     ),
@@ -297,33 +306,27 @@ class ClientProfileScreen extends StatelessWidget {
 
               SizedBox(height: 20.h),
 
-              // === Sign Out Button ===
+              // === Sign Out ===
               GestureDetector(
                 onTap: controller.signOut,
                 child: Container(
                   width: double.infinity,
-                  padding: EdgeInsets.symmetric(vertical: 14.h),
+                  padding: EdgeInsets.symmetric(vertical: 16.h),
                   decoration: BoxDecoration(
-                    color: Colors.white,
-                    border: Border.all(
-                      color: const Color(0xFFFF5252).withOpacity(0.3),
-                    ),
+                    color: const Color(0xFFFFF6F7),
                     borderRadius: BorderRadius.circular(15.r),
+                    border: Border.all(color: const Color(0xFFF48FB1).withOpacity(0.1)),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(
-                        Icons.logout,
-                        color: const Color(0xFFFF5252),
-                        size: 18.sp,
-                      ),
+                      Icon(Icons.logout_rounded, color: const Color(0xFFFF5252), size: 18.sp),
                       SizedBox(width: 8.w),
                       Text(
                         "Sign Out",
                         style: GoogleFonts.lato(
                           fontSize: 14.sp,
-                          fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.w700,
                           color: const Color(0xFFFF5252),
                         ),
                       ),
@@ -332,7 +335,7 @@ class ClientProfileScreen extends StatelessWidget {
                 ),
               ),
 
-              SizedBox(height: 230.h),
+              SizedBox(height: 120.h),
             ],
           ),
         );
@@ -340,106 +343,95 @@ class ClientProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoRow(
-    IconData icon,
-    String label,
-    String value, {
-    bool isAction = false,
+  Widget _buildInfoItem({
+    required IconData icon,
+    required String label,
+    required String value,
     VoidCallback? onTap,
   }) {
     return GestureDetector(
       onTap: onTap,
-      child: Row(
-        children: [
-          Container(
-            width: 40.w,
-            height: 40.w,
-            decoration: BoxDecoration(
-              color: const Color(0xFFFFF0F3),
-              borderRadius: BorderRadius.circular(10.r),
+      child: Padding(
+        padding: EdgeInsets.only(bottom: 20.h),
+        child: Row(
+          children: [
+            Container(
+              padding: EdgeInsets.all(10.w),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFF1F4),
+                borderRadius: BorderRadius.circular(12.r),
+              ),
+              child: Icon(icon, color: const Color(0xFFF48FB1), size: 18.sp),
             ),
-            child: Icon(icon, color: const Color(0xFFF48FB1), size: 20.sp),
-          ),
-          SizedBox(width: 15.w),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: GoogleFonts.lato(
-                    fontSize: 10.sp,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.grey[500],
-                    letterSpacing: 0.5,
+            SizedBox(width: 16.w),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    label,
+                    style: GoogleFonts.lato(
+                      fontSize: 10.sp,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.grey[500],
+                      letterSpacing: 0.5,
+                    ),
                   ),
-                ),
-                SizedBox(height: 4.h),
-                Text(
-                  value,
-                  style: GoogleFonts.playfairDisplay(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.black87,
+                  Text(
+                    value,
+                    style: GoogleFonts.playfairDisplay(
+                      fontSize: 15.sp,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black87,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          if (isAction)
-            Icon(Icons.chevron_right, size: 20.sp, color: Colors.grey[400]),
-        ],
+            if (onTap != null)
+              Icon(Icons.chevron_right, color: Colors.grey[300], size: 20.sp),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildActionRow(
-    IconData icon,
-    String label, {
+  Widget _buildActionItem({
+    required IconData icon,
+    required String label,
     bool isDestructive = false,
     required VoidCallback onTap,
   }) {
     return GestureDetector(
       onTap: onTap,
-      child: Row(
-        children: [
-          Container(
-            // Transparent bg for icons in actions section, or same style? Image shows icons without big bg, just icon.
-            // Wait, image shows Lock has no bg, Delete has no bg but red color.
-            // Actually they look like simple icons next to text.
-            child: Icon(
+      child: Padding(
+        padding: EdgeInsets.only(bottom: 18.h),
+        child: Row(
+          children: [
+            Icon(
               icon,
-              color: isDestructive ? const Color(0xFFFF5252) : Colors.grey[700],
+              color: isDestructive ? const Color(0xFFFF5252) : const Color(0xFF2D2D2D),
               size: 20.sp,
             ),
-          ),
-          SizedBox(width: 15.w),
-          Expanded(
-            child: Text(
-              label,
-              style: GoogleFonts.playfairDisplay(
-                fontSize: 15.sp,
-                fontWeight: FontWeight.w500,
-                color: isDestructive ? const Color(0xFFFF5252) : Colors.black87,
+            SizedBox(width: 16.w),
+            Expanded(
+              child: Text(
+                label,
+                style: GoogleFonts.playfairDisplay(
+                  fontSize: 15.sp,
+                  fontWeight: FontWeight.w600,
+                  color: isDestructive ? const Color(0xFFFF5252) : const Color(0xFF2D2D2D),
+                ),
               ),
             ),
-          ),
-          Icon(
-            Icons.chevron_right,
-            color: isDestructive
-                ? const Color(0xFFFF5252).withOpacity(0.5)
-                : Colors.grey[400],
-            size: 20.sp,
-          ),
-        ],
+            Icon(
+              Icons.chevron_right,
+              color: isDestructive ? const Color(0xFFFF5252).withOpacity(0.3) : Colors.grey[200],
+              size: 20.sp,
+            ),
+          ],
+        ),
       ),
-    );
-  }
-
-  Widget _buildDivider() {
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: 15.h),
-      child: Divider(color: Colors.grey[100], thickness: 1),
     );
   }
 }
