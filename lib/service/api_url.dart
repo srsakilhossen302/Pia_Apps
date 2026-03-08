@@ -17,4 +17,5 @@ class ApiConstant {
   static const String cycleOverview = "$apiVersion/cycle/overview";
   static const String cycleCalendar = "$apiVersion/cycle/calendar";
   static const String cyclePhase = "$apiVersion/cycle/phase";
+  static const String grocery = "$apiVersion/grocery";
 }

@@ -1,0 +1,35 @@
+Grocery Module API Documentation for Flutter
+This document provides the necessary information for Flutter developers to implement the Grocery and Pantry features.
+Base URL & Authentication
+Base URL: {{BASE_URL}}/api/v1/grocery
+Authentication: All endpoints require a Bearer Token in the headers.
+Header: Authorization: Bearer <JWT_TOKEN>
+Data Models (Dart)
+Grocery Item
+dartclass GroceryItem {  final String id;  final String name;  final bool isBought;  GroceryItem({    required this.id,    required this.name,    required this.isBought,  });  factory GroceryItem.fromJson(Map<String, dynamic> json) {    return GroceryItem(      id: json['_id'] ?? '',      name: json['name'] ?? '',      isBought: json['isBought'] ?? false,    );  }}
+Grocery List
+dartclass GroceryList {  final String id;  final String title;  final List<GroceryItem> items;  final DateTime createdAt;  GroceryList({    required this.id,    required this.title,    required this.items,    required this.createdAt,  });  factory GroceryList.fromJson(Map<String, dynamic> json) {    return GroceryList(      id: json['_id'] ?? '',      title: json['title'] ?? '',      items: (json['items'] as List?)              ?.map((item) => GroceryItem.fromJson(item))              .toList() ??          [],      createdAt: DateTime.parse(json['createdAt']),    );  }}
+Pantry Item
+dartclass PantryItem {  final String id;  final String name;  PantryItem({    required this.id,    required this.name,  });  factory PantryItem.fromJson(Map<String, dynamic> json) {    return PantryItem(      id: json['_id'] ?? '',      name: json['name'] ?? '',    );  }}
+API Endpoints
+1. Pantry Management
+Feature	Method	Endpoint	Request Body	Description
+Get Pantry	GET	/pantry	N/A	Fetches all items in the user's pantry.
+Add Item	POST	/pantry	{ "name": "Milk" }	Adds a new item to the pantry.
+Remove Item	DELETE	/pantry/:itemId	N/A	Removes an item from the pantry.
+2. Grocery List Management
+Feature	Method	Endpoint	Request Body	Description
+Get All Lists	GET	/	N/A	Fetches all grocery lists created by the user.
+Create List	POST	/	{ "title": "Weekly Groceries" }	Creates a new empty grocery list.
+Get Single List	GET	/:id	N/A	Fetches details of a specific grocery list by ID.
+Update Title	PATCH	/:id	{ "title": "Updated Title" }	Updates the title of a specific list.
+Delete List	DELETE	/:id	N/A	Deletes an entire grocery list.
+3. Grocery Item Management
+Feature	Method	Endpoint	Request Body	Description
+Add Item	POST	/:id/items	{ "name": "Eggs" }	Adds a new item to a specific grocery list.
+Toggle Status	PATCH	/:listId/items/:itemId/toggle	N/A	Toggles the isBought status of an item.
+Move to Pantry	POST	/:listId/items/:itemId/move-to-pantry	N/A	Moves an item from grocery list to pantry.
+Delete Item	DELETE	/:listId/items/:itemId	N/A	Removes an item from a specific grocery list.
+Example Flutter Service (Dio)
+dartimport 'package:dio/dio.dart';class GroceryService {  final Dio _dio = Dio(BaseOptions(baseUrl: 'https://your-api.com/api/v1/grocery'));  // Get all grocery lists  Future<List<GroceryList>> getAllLists(String token) async {    final response = await _dio.get('/',       options: Options(headers: {'Authorization': 'Bearer $token'})    );    return (response.data['data'] as List)        .map((list) => GroceryList.fromJson(list))        .toList();  }  // Add item to list  Future<void> addItemToList(String listId, String itemName, String token) async {    await _dio.post('/$listId/items',       data: {'name': itemName},      options: Options(headers: {'Authorization': 'Bearer $token'})    );  }  // Toggle item status  Future<void> toggleItemStatus(String listId, String itemId, String token) async {    await _dio.patch('/$listId/items/$itemId/toggle',      options: Options(headers: {'Authorization': 'Bearer $token'})    );  }}
+ 

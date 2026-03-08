@@ -13,380 +13,348 @@ class ClientGroceryScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFFF3F4), // Light pink background
+      backgroundColor: const Color(0xFFFFF6F7),
       resizeToAvoidBottomInset: false,
+      appBar: AppBar(
+        title: Text(
+          "GROCERY",
+          style: GoogleFonts.playfairDisplay(
+            fontSize: 18.sp,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 1.2,
+          ),
+        ),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        centerTitle: true,
+        scrolledUnderElevation: 0,
+      ),
       body: Stack(
         children: [
-          SafeArea(
-            bottom: false,
-            child: SingleChildScrollView(
-              padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // === YOUR LISTS ===
-                  Text(
-                    "YOUR LISTS",
-                    style: GoogleFonts.playfairDisplay(
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.w500,
-                      color: const Color(0xFF2D2D2D),
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                  SizedBox(height: 15.h),
+          // Content Layer
+          Positioned.fill(
+            child: SafeArea(
+              bottom: false,
+              child: Obx(
+                () => controller.isLoading.value
+                    ? const Center(child: CircularProgressIndicator(color: Color(0xFFF48FB1)))
+                    : SingleChildScrollView(
+                        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // === YOUR LISTS ===
+                            _buildSectionTitle("YOUR LISTS"),
+                            SizedBox(height: 12.h),
 
-                  // New List Input
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Container(
-                          padding: EdgeInsets.symmetric(horizontal: 16.w),
-                          height: 45.h,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(25.r),
-                          ),
-                          child: TextField(
-                            controller: controller.newListController,
-                            decoration: InputDecoration(
-                              hintText: "New list name...",
-                              hintStyle: GoogleFonts.lato(
-                                color: Colors.grey[400],
-                                fontSize: 14.sp,
-                              ),
-                              border: InputBorder.none,
+                            _buildInputRow(
+                              controller: controller.newListController,
+                              hint: "New list name...",
+                              onAdd: controller.createList,
                             ),
-                          ),
-                        ),
-                      ),
-                      SizedBox(width: 10.w),
-                      Container(
-                        width: 45.h,
-                        height: 45.h,
-                        decoration: const BoxDecoration(
-                          color: Color(0xFFF48FB1),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(Icons.add, color: Colors.white),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 15.h),
+                            SizedBox(height: 15.h),
 
-                  // Existing List Card
-                  Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 16.w,
-                      vertical: 12.h,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(20.r),
-                    ),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                "My Grocery List",
-                                style: GoogleFonts.playfairDisplay(
-                                  fontSize: 16.sp,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.black87,
+                            ...controller.groceryLists.map((list) => _buildListCard(list)),
+
+                            SizedBox(height: 30.h),
+
+                            // === PANTRY ===
+                            _buildSectionTitle("PANTRY", icon: Icons.inventory_2_outlined),
+                            SizedBox(height: 12.h),
+
+                            _buildInputRow(
+                              controller: controller.newPantryItemController,
+                              hint: "Add to pantry...",
+                              onAdd: controller.addPantryItem,
+                            ),
+                            SizedBox(height: 15.h),
+
+                            // Pantry Items List
+                            if (controller.pantryItems.isEmpty)
+                              _buildEmptyState("Pantry is empty")
+                            else
+                              Container(
+                                width: double.infinity,
+                                padding: EdgeInsets.all(5.w),
+                                child: Wrap(
+                                  spacing: 8.w,
+                                  runSpacing: 10.h,
+                                  children: controller.pantryItems
+                                      .map((item) => _buildPantryChip(item))
+                                      .toList(),
                                 ),
                               ),
-                              Text(
-                                "6 items",
-                                style: GoogleFonts.lato(
-                                  fontSize: 12.sp,
-                                  color: Colors.grey,
-                                ),
+
+                            SizedBox(height: 30.h),
+
+                            // === CURRENT LIST ===
+                            if (controller.selectedList.value != null) ...[
+                              _buildSectionTitle(
+                                controller.selectedList.value!.title.toUpperCase(),
+                                icon: Icons.shopping_bag_outlined,
                               ),
+                              SizedBox(height: 12.h),
+
+                              _buildInputRow(
+                                controller: controller.newItemController,
+                                hint: "Add item...",
+                                onAdd: controller.addItem,
+                              ),
+                              SizedBox(height: 20.h),
+
+                              if (controller.selectedList.value!.items.isEmpty)
+                                _buildEmptyState("No items in this list")
+                              else
+                                Column(
+                                  children: controller.selectedList.value!.items
+                                      .map((item) => _buildGroceryItemRow(item))
+                                      .toList(),
+                                ),
+                            ] else ...[
+                              _buildEmptyState("Please select or create a list"),
                             ],
-                          ),
-                        ),
-                        Icon(
-                          Icons.edit_outlined,
-                          size: 20.sp,
-                          color: Colors.black54,
-                        ),
-                        SizedBox(width: 10.w),
-                        Icon(
-                          Icons.delete_outline,
-                          size: 20.sp,
-                          color: Colors.black54,
-                        ),
-                      ],
-                    ),
-                  ),
 
-                  SizedBox(height: 30.h),
-
-                  // === PANTRY ===
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.inventory_2_outlined,
-                        color: const Color(0xFFF48FB1),
-                        size: 20.sp,
-                      ),
-                      SizedBox(width: 8.w),
-                      Text(
-                        "PANTRY",
-                        style: GoogleFonts.playfairDisplay(
-                          fontSize: 16.sp,
-                          color: const Color(0xFF2D2D2D),
+                            SizedBox(height: 160.h), // Safe scrolling space
+                          ],
                         ),
                       ),
-                    ],
-                  ),
-                  SizedBox(height: 15.h),
-
-                  // Pantry Item
-                  Obx(
-                    () => Column(
-                      children: controller.pantryItems
-                          .map(
-                            (item) => Container(
-                              margin: EdgeInsets.only(bottom: 10.h),
-                              padding: EdgeInsets.symmetric(
-                                horizontal: 16.w,
-                                vertical: 12.h,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(15.r),
-                              ),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    item,
-                                    style: GoogleFonts.playfairDisplay(
-                                      fontSize: 14.sp,
-                                      color: Colors.black87,
-                                    ),
-                                  ),
-                                  Icon(
-                                    Icons.close,
-                                    size: 18.sp,
-                                    color: Colors.black54,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          )
-                          .toList(),
-                    ),
-                  ),
-
-                  SizedBox(height: 20.h),
-
-                  // === MY GROCERY LIST Header ===
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.shopping_bag_outlined,
-                        color: const Color(0xFFF48FB1),
-                        size: 20.sp,
-                      ),
-                      SizedBox(width: 8.w),
-                      Text(
-                        "MY GROCERY LIST",
-                        style: GoogleFonts.playfairDisplay(
-                          fontSize: 16.sp,
-                          color: const Color(0xFF2D2D2D),
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 15.h),
-
-                  // Add Item Input
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Container(
-                          padding: EdgeInsets.symmetric(horizontal: 16.w),
-                          height: 45.h,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(25.r),
-                          ),
-                          child: TextField(
-                            controller: controller.newItemController,
-                            decoration: InputDecoration(
-                              hintText: "Add item...",
-                              hintStyle: GoogleFonts.playfairDisplay(
-                                color: Colors.grey[500],
-                                fontSize: 14.sp,
-                              ),
-                              border: InputBorder.none,
-                            ),
-                          ),
-                        ),
-                      ),
-                      SizedBox(width: 10.w),
-                      GestureDetector(
-                        onTap: controller.addItem,
-                        child: Container(
-                          height: 45.h,
-                          padding: EdgeInsets.symmetric(horizontal: 20.w),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFF48FB1),
-                            borderRadius: BorderRadius.circular(25.r),
-                          ),
-                          child: Center(
-                            child: Row(
-                              children: [
-                                Icon(
-                                  Icons.add,
-                                  color: Colors.white,
-                                  size: 18.sp,
-                                ),
-                                SizedBox(width: 5.w),
-                                Text(
-                                  "Add",
-                                  style: GoogleFonts.lato(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 20.h),
-
-                  // === Grocery Items List ===
-                  Obx(
-                    () => Column(
-                      children: List.generate(
-                        controller.currentListItems.length,
-                        (index) {
-                          final item = controller.currentListItems[index];
-                          return Padding(
-                            padding: EdgeInsets.only(bottom: 10.h),
-                            child: GestureDetector(
-                              onTap: () => controller.toggleItem(index),
-                              child: Container(
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: 16.w,
-                                  vertical: 12.h,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: item.isChecked
-                                      ? const Color(0xFFFFF0F3)
-                                      : Colors.white, // Pinkish if checked
-                                  borderRadius: BorderRadius.circular(20.r),
-                                ),
-                                child: Row(
-                                  children: [
-                                    // Checkbox
-                                    Container(
-                                      width: 24.w,
-                                      height: 24.w,
-                                      decoration: BoxDecoration(
-                                        color: item.isChecked
-                                            ? const Color(0xFFF48FB1)
-                                            : Colors.transparent,
-                                        border: Border.all(
-                                          color: item.isChecked
-                                              ? const Color(0xFFF48FB1)
-                                              : Colors.grey[300]!,
-                                        ),
-                                        borderRadius: BorderRadius.circular(
-                                          6.r,
-                                        ),
-                                      ),
-                                      child: item.isChecked
-                                          ? Icon(
-                                              Icons.check,
-                                              size: 16.sp,
-                                              color: Colors.white,
-                                            )
-                                          : null,
-                                    ),
-                                    SizedBox(width: 15.w),
-
-                                    // Name
-                                    Expanded(
-                                      child: Text(
-                                        item.name,
-                                        style: GoogleFonts.playfairDisplay(
-                                          fontSize: 15.sp,
-                                          color: item.isChecked
-                                              ? Colors.grey[500]
-                                              : Colors.black87,
-                                          decoration: item.isChecked
-                                              ? TextDecoration.lineThrough
-                                              : null,
-                                          decorationColor: const Color(
-                                            0xFFF48FB1,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-
-                                    // Actions
-                                    Container(
-                                      width: 32.w,
-                                      height: 32.w,
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        border: Border.all(
-                                          color: Colors.grey[200]!,
-                                        ),
-                                      ),
-                                      child: Icon(
-                                        Icons.inventory_2_outlined,
-                                        size: 16.sp,
-                                        color: Colors.black54,
-                                      ),
-                                    ),
-                                    SizedBox(width: 8.w),
-                                    GestureDetector(
-                                      onTap: () => controller.removeItem(index),
-                                      child: Icon(
-                                        Icons.delete_outline,
-                                        size: 20.sp,
-                                        color: Colors.black54,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  ),
-
-                  SizedBox(height: 200.h), // Space for navbar
-                ],
               ),
             ),
           ),
 
-          // === Bottom Navbar ===
-          // Hide navbar when keyboard is open
+          // Nav Bar Layer - Fixed to absolute bottom
           if (MediaQuery.of(context).viewInsets.bottom == 0)
             Positioned(
-              bottom: 0,
               left: 0,
               right: 0,
+              bottom: 0,
               child: ClientNavBar(selectedIndex: 4),
             ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildSectionTitle(String title, {IconData? icon}) {
+    return Row(
+      children: [
+        if (icon != null) ...[
+          Icon(icon, color: const Color(0xFFF48FB1), size: 18.sp),
+          SizedBox(width: 8.w),
+        ],
+        Text(
+          title,
+          style: GoogleFonts.playfairDisplay(
+            fontSize: 15.sp,
+            fontWeight: FontWeight.w600,
+            color: const Color(0xFF2D2D2D),
+            letterSpacing: 0.8,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildInputRow({
+    required TextEditingController controller,
+    required String hint,
+    required VoidCallback onAdd,
+  }) {
+    return Row(
+      children: [
+        Expanded(
+          child: Container(
+            height: 45.h,
+            padding: EdgeInsets.symmetric(horizontal: 16.w),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(25.r),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.04),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Center(
+              child: TextField(
+                controller: controller,
+                textAlignVertical: TextAlignVertical.center,
+                style: GoogleFonts.lato(fontSize: 14.sp),
+                decoration: InputDecoration(
+                  hintText: hint,
+                  hintStyle: GoogleFonts.lato(color: Colors.grey[400], fontSize: 13.sp),
+                  border: InputBorder.none,
+                  isDense: true,
+                  contentPadding: EdgeInsets.zero,
+                ),
+              ),
+            ),
+          ),
+        ),
+        SizedBox(width: 10.w),
+        GestureDetector(
+          onTap: onAdd,
+          child: Container(
+            width: 45.h,
+            height: 45.h,
+            decoration: const BoxDecoration(
+              color: Color(0xFFF48FB1),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(Icons.add, color: Colors.white),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildListCard(dynamic list) {
+    bool isSelected = controller.selectedList.value?.id == list.id;
+    return GestureDetector(
+      onTap: () => controller.selectedList.value = list,
+      child: Container(
+        margin: EdgeInsets.only(bottom: 10.h),
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0xFFF48FB1).withOpacity(0.08) : Colors.white,
+          borderRadius: BorderRadius.circular(15.r),
+          border: isSelected ? Border.all(color: const Color(0xFFF48FB1).withOpacity(0.5)) : null,
+          boxShadow: [
+            if (!isSelected)
+              BoxShadow(
+                color: Colors.black.withOpacity(0.02),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    list.title,
+                    style: GoogleFonts.playfairDisplay(
+                      fontSize: 15.sp,
+                      fontWeight: FontWeight.w600,
+                      color: isSelected ? const Color(0xFFF48FB1) : Colors.black87,
+                    ),
+                  ),
+                  Text(
+                    "${list.items.length} items",
+                    style: GoogleFonts.lato(fontSize: 11.sp, color: Colors.grey),
+                  ),
+                ],
+              ),
+            ),
+            IconButton(
+              icon: Icon(Icons.delete_outline, size: 20.sp, color: Colors.grey[400]),
+              onPressed: () => controller.deleteList(list.id),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPantryChip(dynamic item) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(25.r),
+        border: Border.all(color: const Color(0xFFF48FB1).withOpacity(0.15)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            item.name,
+            style: GoogleFonts.lato(fontSize: 13.sp, color: Colors.black87, fontWeight: FontWeight.w400),
+          ),
+          SizedBox(width: 8.w),
+          GestureDetector(
+            onTap: () => controller.removePantryItem(item.id),
+            child: Icon(Icons.close, size: 14.sp, color: Colors.grey[400]),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildGroceryItemRow(dynamic item) {
+    bool isBought = item.isBought;
+    return Container(
+      margin: EdgeInsets.only(bottom: 10.h),
+      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(15.r),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 5,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Checkbox(
+            value: isBought,
+            activeColor: const Color(0xFFF48FB1),
+            onChanged: (val) => controller.toggleItem(item.id),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4.r)),
+          ),
+          Expanded(
+            child: Text(
+              item.name,
+              style: GoogleFonts.playfairDisplay(
+                fontSize: 14.sp,
+                color: isBought ? Colors.grey[400] : Colors.black87,
+                decoration: isBought ? TextDecoration.lineThrough : null,
+              ),
+            ),
+          ),
+          // Move to Pantry
+          IconButton(
+            icon: Icon(Icons.inventory_2_outlined, size: 18.sp, color: const Color(0xFFF48FB1).withOpacity(0.6)),
+            onPressed: () => controller.moveToPantry(item.id),
+            tooltip: "Move to Pantry",
+          ),
+          // Delete
+          IconButton(
+            icon: Icon(Icons.delete_outline, size: 18.sp, color: Colors.grey[300]),
+            onPressed: () => controller.deleteItem(item.id),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyState(String message) {
+    return Center(
+      child: Padding(
+        padding: EdgeInsets.symmetric(vertical: 20.h),
+        child: Text(
+          message,
+          style: GoogleFonts.lato(
+            color: Colors.grey[400],
+            fontSize: 13.sp,
+            fontStyle: FontStyle.italic,
+          ),
+        ),
       ),
     );
   }
