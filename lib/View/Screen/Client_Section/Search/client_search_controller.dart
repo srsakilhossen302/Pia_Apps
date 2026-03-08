@@ -65,6 +65,18 @@ class ClientSearchController extends GetxController {
     searchRecipes();
   }
 
+  void clearFilters() {
+    selectedPhase.value = "All phases";
+    selectedMealType.value = "All types";
+    maxCaloriesController.clear();
+    maxCalories.value = "";
+    selectedFeeling.value = "Select feeling";
+    selectedNutrients.clear();
+    
+    // Search recipes again with empty filters
+    searchRecipes();
+  }
+
   void updateSearchQuery(String query) {
     searchQuery.value = query;
   }

@@ -135,14 +135,30 @@ class ClientSearchScreen extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            "FILTERS",
-                            style: GoogleFonts.playfairDisplay(
-                              fontSize: 16.sp,
-                              fontWeight: FontWeight.w600,
-                              letterSpacing: 1.0,
-                              color: Colors.grey[700],
-                            ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                "FILTERS",
+                                style: GoogleFonts.playfairDisplay(
+                                  fontSize: 16.sp,
+                                  fontWeight: FontWeight.w600,
+                                  letterSpacing: 1.0,
+                                  color: Colors.grey[700],
+                                ),
+                              ),
+                              GestureDetector(
+                                onTap: controller.clearFilters,
+                                child: Text(
+                                  "Cancel",
+                                  style: GoogleFonts.lato(
+                                    fontSize: 14.sp,
+                                    fontWeight: FontWeight.w600,
+                                    color: const Color(0xFFF48FB1),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                           SizedBox(height: 20.h),
 
