@@ -9,6 +9,7 @@ import '../../../../Utils/AppIcons/app_icons.dart';
 import '../../../../Core/AppRoute/app_route.dart';
 import '../../../../service/api_url.dart';
 import '../../../Widgets/custom_bottom_nav_bar.dart';
+import '../../../Widgets/shimmer_loaders.dart';
 import 'client_home_controller.dart';
 import 'recipe_detail_screen.dart';
 import '../../Health_Setup/Period_Start/period_start_screen.dart';
@@ -32,7 +33,12 @@ class ClientHomeScreen extends StatelessWidget {
               },
               color: const Color(0xFFFF8FA3),
               backgroundColor: Colors.white,
-              child: SingleChildScrollView(
+              child: Obx(() {
+                // Show full shimmer while initially loading
+                if (controller.isLoadingCycle.value && controller.cycleOverview.value == null) {
+                  return const HomeScreenShimmer();
+                }
+                return SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
                 child: Column(
                 children: [
@@ -230,9 +236,7 @@ class ClientHomeScreen extends StatelessWidget {
                       if (controller.isLoadingCycle.value) {
                         return Padding(
                           padding: EdgeInsets.symmetric(vertical: 20.h),
-                          child: const Center(
-                            child: CircularProgressIndicator(),
-                          ),
+                          child: const RecipeListShimmer(itemCount: 3),
                         );
                       }
                       final cycleVal = controller.cycleOverview.value;
@@ -266,7 +270,8 @@ class ClientHomeScreen extends StatelessWidget {
                   SizedBox(height: 200.h), // Bottom padding for navbar
                 ],
               ),
-            ),
+              );
+              }),
             ),
             Positioned(
               bottom: 0,

@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../Widgets/custom_bottom_nav_bar.dart';
 import '../../../Widgets/recipe_card.dart';
+import '../../../Widgets/shimmer_loaders.dart';
 import 'client_favorites_controller.dart';
 
 class ClientFavoritesScreen extends StatefulWidget {
@@ -96,11 +97,7 @@ class _ClientFavoritesScreenState extends State<ClientFavoritesScreen>
                 Expanded(
                   child: Obx(() {
                     if (controller.isLoading.value) {
-                      return const Center(
-                        child: CircularProgressIndicator(
-                          color: Color(0xFFF48FB1),
-                        ),
-                      );
+                      return const RecipeListShimmer(itemCount: 4);
                     }
                     if (controller.favoriteMeals.isEmpty) {
                       return Center(

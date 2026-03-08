@@ -61,8 +61,8 @@ class ClientProfileScreen extends StatelessWidget {
 
         String profileImage = user.profile != null
             ? (user.profile!.startsWith('http')
-                ? user.profile!
-                : "${ApiConstant.baseUrl}${user.profile}")
+                  ? user.profile!
+                  : "${ApiConstant.baseUrl}${user.profile}")
             : 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200';
 
         return SingleChildScrollView(
@@ -95,14 +95,20 @@ class ClientProfileScreen extends StatelessWidget {
                       bottom: 5.h,
                       right: 5.w,
                       child: GestureDetector(
-                        onTap: () => controller.pickProfileImage(Icons.camera_alt as dynamic), // Just a placeholder for logic
+                        onTap: () => controller.pickProfileImage(
+                          Icons.camera_alt as dynamic,
+                        ), // Just a placeholder for logic
                         child: Container(
                           padding: EdgeInsets.all(8.w),
                           decoration: const BoxDecoration(
                             color: Color(0xFFF48FB1),
                             shape: BoxShape.circle,
                           ),
-                          child: Icon(Icons.camera_alt, color: Colors.white, size: 16.sp),
+                          child: Icon(
+                            Icons.camera_alt,
+                            color: Colors.white,
+                            size: 16.sp,
+                          ),
                         ),
                       ),
                     ),
@@ -167,15 +173,20 @@ class ClientProfileScreen extends StatelessWidget {
                     _buildInfoItem(
                       icon: Icons.cake_outlined,
                       label: "BIRTHDAY",
-                      value: user.dateOfBirth != null 
-                          ? DateFormat('MMMM dd, yyyy').format(user.dateOfBirth!) 
+                      value: user.dateOfBirth != null
+                          ? DateFormat(
+                              'MMMM dd, yyyy',
+                            ).format(user.dateOfBirth!)
                           : "N/A",
                     ),
                     _buildInfoItem(
                       icon: Icons.verified_user_outlined,
                       label: "SUBSCRIPTION STATUS",
-                      value: (user.subscribe ?? false) ? "Premium Plan" : "Free Plan",
-                      onTap: () => Get.toNamed(AppRoute.clientSubscriptionScreen),
+                      value: (user.subscribe ?? false)
+                          ? "Premium Plan"
+                          : "Free Plan",
+                      onTap: () =>
+                          Get.toNamed(AppRoute.clientSubscriptionScreen),
                     ),
                     _buildInfoItem(
                       icon: Icons.favorite_border,
@@ -183,7 +194,7 @@ class ClientProfileScreen extends StatelessWidget {
                       value: "Step Up Your Health Profile",
                       onTap: () => Get.to(() => PeriodStartScreen()),
                     ),
-                    
+
                     // Apple Health
                     Row(
                       children: [
@@ -193,7 +204,11 @@ class ClientProfileScreen extends StatelessWidget {
                             color: const Color(0xFFFFF1F4),
                             borderRadius: BorderRadius.circular(12.r),
                           ),
-                          child: Icon(Icons.watch, color: const Color(0xFFF48FB1), size: 18.sp),
+                          child: Icon(
+                            Icons.watch,
+                            color: const Color(0xFFF48FB1),
+                            size: 18.sp,
+                          ),
                         ),
                         SizedBox(width: 16.w),
                         Expanded(
@@ -219,13 +234,17 @@ class ClientProfileScreen extends StatelessWidget {
                             ],
                           ),
                         ),
-                        Obx(() => Switch(
-                          value: controller.isHealthSyncEnabled.value,
-                          onChanged: controller.toggleHealthSync,
-                          activeColor: const Color(0xFFF48FB1),
-                          activeTrackColor: const Color(0xFFF48FB1).withOpacity(0.3),
-                          inactiveThumbColor: Colors.white,
-                        )),
+                        Obx(
+                          () => Switch(
+                            value: controller.isHealthSyncEnabled.value,
+                            onChanged: controller.toggleHealthSync,
+                            activeColor: const Color(0xFFF48FB1),
+                            activeTrackColor: const Color(
+                              0xFFF48FB1,
+                            ).withOpacity(0.3),
+                            inactiveThumbColor: Colors.white,
+                          ),
+                        ),
                       ],
                     ),
                   ],
@@ -315,12 +334,18 @@ class ClientProfileScreen extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: const Color(0xFFFFF6F7),
                     borderRadius: BorderRadius.circular(15.r),
-                    border: Border.all(color: const Color(0xFFF48FB1).withOpacity(0.1)),
+                    border: Border.all(
+                      color: const Color(0xFFF48FB1).withOpacity(0.1),
+                    ),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.logout_rounded, color: const Color(0xFFFF5252), size: 18.sp),
+                      Icon(
+                        Icons.logout_rounded,
+                        color: const Color(0xFFFF5252),
+                        size: 18.sp,
+                      ),
                       SizedBox(width: 8.w),
                       Text(
                         "Sign Out",
@@ -410,7 +435,9 @@ class ClientProfileScreen extends StatelessWidget {
           children: [
             Icon(
               icon,
-              color: isDestructive ? const Color(0xFFFF5252) : const Color(0xFF2D2D2D),
+              color: isDestructive
+                  ? const Color(0xFFFF5252)
+                  : const Color(0xFF2D2D2D),
               size: 20.sp,
             ),
             SizedBox(width: 16.w),
@@ -420,13 +447,17 @@ class ClientProfileScreen extends StatelessWidget {
                 style: GoogleFonts.playfairDisplay(
                   fontSize: 15.sp,
                   fontWeight: FontWeight.w600,
-                  color: isDestructive ? const Color(0xFFFF5252) : const Color(0xFF2D2D2D),
+                  color: isDestructive
+                      ? const Color(0xFFFF5252)
+                      : const Color(0xFF2D2D2D),
                 ),
               ),
             ),
             Icon(
               Icons.chevron_right,
-              color: isDestructive ? const Color(0xFFFF5252).withOpacity(0.3) : Colors.grey[200],
+              color: isDestructive
+                  ? const Color(0xFFFF5252).withOpacity(0.3)
+                  : Colors.grey[200],
               size: 20.sp,
             ),
           ],

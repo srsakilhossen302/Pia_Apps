@@ -8,6 +8,7 @@ import '../../../Widgets/custom_bottom_nav_bar.dart';
 import '../../../Widgets/recipe_card.dart';
 import '../Home/recipe_detail_screen.dart';
 import 'client_search_controller.dart';
+import '../../../Widgets/shimmer_loaders.dart';
 
 class ClientSearchScreen extends StatelessWidget {
   ClientSearchScreen({super.key});
@@ -303,7 +304,7 @@ class ClientSearchScreen extends StatelessWidget {
                   // === Recipe List ===
                   Obx(() {
                     if (controller.isLoading.value) {
-                      return const Center(child: CircularProgressIndicator());
+                      return const RecipeListShimmer(itemCount: 4);
                     }
 
                     return ListView.builder(
