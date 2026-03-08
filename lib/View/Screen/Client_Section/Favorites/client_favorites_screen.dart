@@ -6,17 +6,37 @@ import '../../../Widgets/custom_bottom_nav_bar.dart';
 import '../../../Widgets/recipe_card.dart';
 import 'client_favorites_controller.dart';
 
-class ClientFavoritesScreen extends StatelessWidget {
-  ClientFavoritesScreen({super.key});
+class ClientFavoritesScreen extends StatefulWidget {
+  const ClientFavoritesScreen({super.key});
 
-  final ClientFavoritesController controller = Get.put(
-    ClientFavoritesController(),
-  );
+  @override
+  State<ClientFavoritesScreen> createState() => _ClientFavoritesScreenState();
+}
+
+class _ClientFavoritesScreenState extends State<ClientFavoritesScreen>
+    with RouteAware {
+  late ClientFavoritesController controller;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = Get.put(ClientFavoritesController());
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Reload every time this screen becomes active (e.g., returned to from details)
+    final route = ModalRoute.of(context);
+    if (route?.isCurrent == true) {
+      controller.loadFavorites();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFFF3F4), // Light pink background
+      backgroundColor: const Color(0xFFFFF3F4),
       resizeToAvoidBottomInset: false,
       body: Stack(
         children: [
@@ -32,7 +52,7 @@ class ClientFavoritesScreen extends StatelessWidget {
                     width: 60.w,
                     height: 60.w,
                     decoration: BoxDecoration(
-                      color: const Color(0xFFFCE4EC), // Very light pink
+                      color: const Color(0xFFFCE4EC),
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
@@ -44,7 +64,7 @@ class ClientFavoritesScreen extends StatelessWidget {
                     ),
                     child: Icon(
                       Icons.favorite,
-                      color: const Color(0xFFF48FB1), // Pink heart
+                      color: const Color(0xFFF48FB1),
                       size: 30.sp,
                     ),
                   ),

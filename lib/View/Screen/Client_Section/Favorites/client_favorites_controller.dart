@@ -28,6 +28,7 @@ class ClientFavoritesController extends GetxController {
           'Authorization': 'Bearer $token',
         },
       );
+      update();
 
       if (response.statusCode == 200) {
         final recipeResponse = RecipeResponseModel.fromJson(response.body);

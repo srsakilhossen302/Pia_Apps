@@ -6,6 +6,7 @@ import '../../../../helper/shared_prefe/shared_prefe.dart';
 import '../../../../helper/toast_helper.dart';
 import '../../../../service/api_url.dart';
 import 'client_home_controller.dart';
+import '../Favorites/client_favorites_controller.dart';
 
 class RecipeDetailController extends GetxController {
   final Rx<RecipeModel?> recipe = Rx<RecipeModel?>(null);
@@ -112,6 +113,7 @@ class RecipeDetailController extends GetxController {
     recipe.value!.isFavorite = !(originalStatus ?? false);
     recipe.refresh();
     _syncWithHomeController();
+    _syncWithFavoritesController();
 
     try {
       final token = await SharePrefsHelper.getString(
@@ -189,6 +191,7 @@ class RecipeDetailController extends GetxController {
             recipe.value!.isFavorite = serverIsFavorite;
             recipe.refresh();
             _syncWithHomeController();
+            _syncWithFavoritesController();
           }
         }
       } else {
@@ -211,5 +214,29 @@ class RecipeDetailController extends GetxController {
     recipe.value!.isFavorite = originalStatus;
     recipe.refresh();
     _syncWithHomeController();
+    _syncWithFavoritesController();
+  }
+
+  void _syncWithFavoritesController() {
+    try {
+      if (Get.isRegistered<ClientFavoritesController>() && recipe.value != null) {
+        final favController = Get.find<ClientFavoritesController>();
+        final recipeId = recipe.value!.id;
+        final isFav = recipe.value!.isFavorite ?? false;
+
+        if (!isFav) {
+          // Remove from favorites list immediately
+          favController.favoriteMeals.removeWhere((r) => r.id == recipeId);
+        } else {
+          // Add back if not already in list
+          final exists = favController.favoriteMeals.any((r) => r.id == recipeId);
+          if (!exists && recipe.value != null) {
+            favController.favoriteMeals.insert(0, recipe.value!);
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint("Favorites sync error: $e");
+    }
   }
 }
