@@ -2,61 +2,47 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../Core/AppRoute/app_route.dart';
 import '../../../../Model/Client_Section/subscription_model.dart';
+import '../../../../helper/shared_prefe/shared_prefe.dart';
+import '../../../../service/api_url.dart';
 
 class ClientSubscriptionController extends GetxController {
-  final List<SubscriptionPlan> plans = [
-    SubscriptionPlan(
-      title: "FREE PLAN",
-      price: "\$0.00",
-      duration: "/mo",
-      features: [
-        "Unlimited recipe access",
-        "Ad-free experience",
-        "Advanced meal planning",
-        "Priority support",
-      ],
-      buttonText: "Free Subscription",
-      primaryColor: const Color(0xFFF48FB1), // Pink
-    ),
-    SubscriptionPlan(
-      title: "YEARLY",
-      price: "\$95.99",
-      duration: "/yr",
-      subtitle: "\$7.99/month",
-      features: [
-        "Everything in Monthly",
-        "Exclusive recipes",
-        "Nutritionist consultations",
-        "Early access to features",
-      ],
-      buttonText: "Subscribe Yearly",
-      primaryColor: const Color(0xFFFFA776), // Orange
-      isRecommended: true,
-      badgeText: "Save 20%",
-    ),
-    SubscriptionPlan(
-      title: "MONTHLY",
-      price: "\$9.99",
-      duration: "/mo",
-      features: [
-        "Unlimited recipe access",
-        "Ad-free experience",
-        "Advanced meal planning",
-        "Priority support",
-      ],
-      buttonText: "Subscribe Monthly",
-      primaryColor: const Color(0xFFF48FB1), // Pink
-    ),
-  ];
+  var isLoading = false.obs;
+  var plans = <SubscriptionPlanModel>[].obs;
 
-  void selectPlan(SubscriptionPlan plan) {
-    if (plan.title == "FREE PLAN") {
-      // Direct activation or logic for free plan
+  @override
+  void onInit() {
+    super.onInit();
+    getSubscriptionPlans();
+  }
+
+  Future<void> getSubscriptionPlans() async {
+    isLoading.value = true;
+    try {
+      final token = await SharePrefsHelper.getString(SharedPreferenceValue.token);
+      final response = await GetConnect().get(
+        "${ApiConstant.baseUrl}${ApiConstant.subscriptionPlans}",
+        headers: {'Authorization': 'Bearer $token'},
+      );
+
+      if (response.statusCode == 200) {
+        final List data = response.body['data'] ?? [];
+        plans.value = data.map((json) => SubscriptionPlanModel.fromJson(json)).toList();
+      }
+    } catch (e) {
+      debugPrint("Subscription Plans Load Error: $e");
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  void selectPlan(SubscriptionPlanModel plan) {
+    if (plan.price == 0) {
       Get.snackbar("Success", "Free plan activated");
-      // Get.offAllNamed(AppRoute.homeScreen);
+      // Logic for free activation
     } else {
       // Navigate to payment for paid plans
-      Get.toNamed(AppRoute.clientPaymentScreen);
+      // Pass plan data to payment screen if needed
+      Get.toNamed(AppRoute.clientPaymentScreen, arguments: plan);
     }
   }
 }

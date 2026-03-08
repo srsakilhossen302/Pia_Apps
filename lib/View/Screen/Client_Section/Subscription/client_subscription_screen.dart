@@ -25,58 +25,66 @@ class ClientSubscriptionScreen extends StatelessWidget {
           onPressed: () => Get.back(),
         ),
       ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 0.h),
-        child: Column(
-          children: [
-            // === Header ===
-            Row(
-              children: [
-                Icon(
-                  Icons.workspace_premium_outlined,
-                  color: const Color(0xFFF48FB1),
-                  size: 24.sp,
-                ),
-                SizedBox(width: 10.w),
-                Text(
-                  "UPGRADE TO PREMIUM",
-                  style: GoogleFonts.playfairDisplay(
-                    fontSize: 18.sp,
-                    fontWeight: FontWeight.w400,
-                    color: Colors.black87,
-                    letterSpacing: 0.5,
+      body: Obx(
+        () => controller.isLoading.value
+            ? const Center(child: CircularProgressIndicator(color: Color(0xFFF48FB1)))
+            : controller.plans.isEmpty
+                ? _buildEmptyState()
+                : SingleChildScrollView(
+                    padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 0.h),
+                    child: Column(
+                      children: [
+                        // === Header ===
+                        _buildHeader(),
+                        SizedBox(height: 25.h),
+
+                        // === Plans List ===
+                        ...controller.plans.map((plan) => _buildPlanCard(plan)),
+
+                        SizedBox(height: 30.h),
+                      ],
+                    ),
                   ),
-                ),
-              ],
-            ),
-            SizedBox(height: 25.h),
-
-            // === Plans List ===
-            Column(
-              children: controller.plans
-                  .map((plan) => _buildPlanCard(plan))
-                  .toList(),
-            ),
-
-            SizedBox(height: 30.h),
-          ],
-        ),
       ),
     );
   }
 
-  Widget _buildPlanCard(SubscriptionPlan plan) {
+  Widget _buildHeader() {
+    return Row(
+      children: [
+        Icon(
+          Icons.workspace_premium_outlined,
+          color: const Color(0xFFF48FB1),
+          size: 24.sp,
+        ),
+        SizedBox(width: 10.w),
+        Text(
+          "UPGRADE TO PREMIUM",
+          style: GoogleFonts.playfairDisplay(
+            fontSize: 18.sp,
+            fontWeight: FontWeight.w400,
+            color: Colors.black87,
+            letterSpacing: 0.5,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPlanCard(SubscriptionPlanModel plan) {
+    bool isRecommended = plan.name.contains("Pro");
+
     return Stack(
       clipBehavior: Clip.none,
       children: [
         Container(
           width: double.infinity,
-          margin: EdgeInsets.only(bottom: 20.h),
+          margin: EdgeInsets.only(bottom: 25.h),
           padding: EdgeInsets.symmetric(vertical: 25.h, horizontal: 20.w),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(25.r),
-            border: plan.isRecommended
+            border: isRecommended
                 ? Border.all(color: plan.primaryColor, width: 1.5)
                 : Border.all(color: Colors.transparent),
             boxShadow: [
@@ -90,21 +98,34 @@ class ClientSubscriptionScreen extends StatelessWidget {
           child: Column(
             children: [
               Text(
-                plan.title,
+                plan.name.toUpperCase(),
+                textAlign: TextAlign.center,
                 style: GoogleFonts.playfairDisplay(
                   fontSize: 16.sp,
+                  fontWeight: FontWeight.w600,
                   color: Colors.black87,
                   letterSpacing: 1.0,
                 ),
               ),
-              SizedBox(height: 10.h),
+              if (plan.description.isNotEmpty) ...[
+                SizedBox(height: 8.h),
+                Text(
+                  plan.description,
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.lato(
+                    fontSize: 12.sp,
+                    color: Colors.grey[600],
+                  ),
+                ),
+              ],
+              SizedBox(height: 15.h),
 
               // Price
               RichText(
                 text: TextSpan(
                   children: [
                     TextSpan(
-                      text: plan.price,
+                      text: "\$${plan.price}",
                       style: GoogleFonts.playfairDisplay(
                         fontSize: 32.sp,
                         fontWeight: FontWeight.bold,
@@ -112,7 +133,7 @@ class ClientSubscriptionScreen extends StatelessWidget {
                       ),
                     ),
                     TextSpan(
-                      text: plan.duration,
+                      text: plan.formattedInterval,
                       style: GoogleFonts.playfairDisplay(
                         fontSize: 16.sp,
                         color: plan.primaryColor.withOpacity(0.6),
@@ -121,43 +142,32 @@ class ClientSubscriptionScreen extends StatelessWidget {
                   ],
                 ),
               ),
-              if (plan.subtitle != null) ...[
-                SizedBox(height: 5.h),
-                Text(
-                  plan.subtitle!,
-                  style: GoogleFonts.lato(
-                    fontSize: 12.sp,
-                    color: Colors.grey[600],
-                  ),
-                ),
-              ],
 
               SizedBox(height: 25.h),
 
               // Features
-              ...plan.features.map((feature) => _buildFeatureItem(feature)),
+              ...plan.features.map((feature) => _buildFeatureItem(feature, plan.primaryColor)),
 
               SizedBox(height: 25.h),
 
               // Button
               SizedBox(
                 width: double.infinity,
-                height: 45.h,
+                height: 48.h,
                 child: ElevatedButton(
                   onPressed: () => controller.selectPlan(plan),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: plan.primaryColor.withOpacity(
-                      plan.isRecommended ? 1.0 : 0.8,
-                    ), // Adjust opacity slightly
+                    backgroundColor: plan.primaryColor,
                     elevation: 0,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(25.r),
                     ),
                   ),
                   child: Text(
-                    plan.buttonText,
+                    "Choose ${plan.name.split(' ').last}",
                     style: GoogleFonts.playfairDisplay(
                       fontSize: 14.sp,
+                      fontWeight: FontWeight.w600,
                       color: Colors.white,
                       letterSpacing: 0.5,
                     ),
@@ -168,8 +178,8 @@ class ClientSubscriptionScreen extends StatelessWidget {
           ),
         ),
 
-        // === Badge ===
-        if (plan.badgeText != null)
+        // === Badge for Pro/Recommended ===
+        if (isRecommended)
           Positioned(
             top: -12.h,
             right: 20.w,
@@ -180,7 +190,7 @@ class ClientSubscriptionScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(20.r),
               ),
               child: Text(
-                plan.badgeText!,
+                "Recommended",
                 style: GoogleFonts.lato(
                   fontSize: 12.sp,
                   color: Colors.white,
@@ -193,30 +203,42 @@ class ClientSubscriptionScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildFeatureItem(String text) {
+  Widget _buildFeatureItem(String text, Color color) {
     return Padding(
-      padding: EdgeInsets.only(bottom: 8.h),
+      padding: EdgeInsets.only(bottom: 10.h),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            width: 6.w,
-            height: 6.w,
+            margin: EdgeInsets.only(top: 6.h),
+            width: 5.w,
+            height: 5.w,
             decoration: BoxDecoration(
-              color: const Color(0xFFF48FB1).withOpacity(0.7),
+              color: color.withOpacity(0.7),
               shape: BoxShape.circle,
             ),
           ),
-          SizedBox(width: 10.w),
+          SizedBox(width: 12.w),
           Expanded(
             child: Text(
               text,
-              style: GoogleFonts.playfairDisplay(
+              style: GoogleFonts.lato(
                 fontSize: 14.sp,
                 color: Colors.grey[800],
+                height: 1.2,
               ),
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Text(
+        "No subscription plans available.",
+        style: GoogleFonts.lato(color: Colors.grey),
       ),
     );
   }
