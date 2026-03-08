@@ -2,12 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../../../Model/Client_Section/cycle_overview_model.dart';
-import '../../../../Utils/AppIcons/app_icons.dart';
 import '../../../Widgets/custom_bottom_nav_bar.dart';
 import '../../../Widgets/recipe_card.dart';
-import '../../../../service/api_url.dart';
-import '../Home/recipe_detail_screen.dart';
 import 'client_favorites_controller.dart';
 
 class ClientFavoritesScreen extends StatelessWidget {

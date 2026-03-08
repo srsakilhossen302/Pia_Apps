@@ -129,11 +129,12 @@ class ClientEditProfileScreen extends StatelessWidget {
 
               // === Form Fields ===
               _buildLabel("Full Name"),
-              _buildTextField(controller.nameController, "Full Name"),
+              _buildTextField(context, controller.nameController, "Full Name"),
 
               SizedBox(height: 20.h),
               _buildLabel("Email Address"),
               _buildTextField(
+                context,
                 controller.emailController,
                 "Email Address",
                 readOnly: true,
@@ -142,6 +143,7 @@ class ClientEditProfileScreen extends StatelessWidget {
               SizedBox(height: 20.h),
               _buildLabel("Birthday"),
               _buildTextField(
+                context,
                 controller.birthdayController,
                 "MM/DD/YYYY",
                 isDate: true,
@@ -286,6 +288,7 @@ class ClientEditProfileScreen extends StatelessWidget {
   }
 
   Widget _buildTextField(
+    BuildContext context,
     TextEditingController controller,
     String hint, {
     bool isDate = false,
@@ -300,6 +303,7 @@ class ClientEditProfileScreen extends StatelessWidget {
       child: TextField(
         controller: controller,
         readOnly: isDate || readOnly,
+        onTap: isDate ? () => this.controller.selectBirthday(context) : null,
         style: GoogleFonts.playfairDisplay(
           color: const Color(0xFF8A9EA8),
           fontSize: 16.sp,
