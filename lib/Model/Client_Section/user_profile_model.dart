@@ -43,6 +43,8 @@ class UserProfileModel {
   List<dynamic>? savedRecipes;
   String? phone;
   DateTime? dateOfBirth;
+  String? subscriptionTier;
+  bool? trialUsed;
 
   UserProfileModel({
     this.location,
@@ -65,6 +67,8 @@ class UserProfileModel {
     this.savedRecipes,
     this.phone,
     this.dateOfBirth,
+    this.subscriptionTier,
+    this.trialUsed,
   });
 
   factory UserProfileModel.fromJson(Map<String, dynamic> json) =>
@@ -107,6 +111,8 @@ class UserProfileModel {
         dateOfBirth: json["dateOfBirth"] == null
             ? null
             : DateTime.parse(json["dateOfBirth"]),
+        subscriptionTier: json["subscriptionTier"],
+        trialUsed: json["trialUsed"],
       );
 }
 

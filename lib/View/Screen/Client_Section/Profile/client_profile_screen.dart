@@ -182,9 +182,11 @@ class ClientProfileScreen extends StatelessWidget {
                     _buildInfoItem(
                       icon: Icons.verified_user_outlined,
                       label: "SUBSCRIPTION STATUS",
-                      value: (user.subscribe ?? false)
-                          ? "Premium Plan"
-                          : "Free Plan",
+                      value: (user.subscriptionTier != null && user.subscriptionTier != 'free')
+                          ? "${user.subscriptionTier![0].toUpperCase()}${user.subscriptionTier!.substring(1)} Plan"
+                          : (user.trialUsed == false)
+                              ? "Free Plan (Trial Available)"
+                              : "Free Plan",
                       onTap: () =>
                           Get.toNamed(AppRoute.clientSubscriptionScreen),
                     ),

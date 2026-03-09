@@ -27,11 +27,21 @@ class ClientSubscriptionScreen extends StatelessWidget {
       body: Stack(
         children: [
           Obx(
-            () => controller.isLoading.value
-                ? _buildShimmerLoading()
-                : controller.plans.isEmpty
-                    ? _buildEmptyState()
-                    : _buildContent(),
+            () {
+              if (controller.isLoading.value) {
+                return _buildShimmerLoading();
+              }
+              
+              if (controller.mySubscription.value != null && controller.mySubscription.value!.isActive) {
+                return _buildActiveSubscriptionView();
+              }
+              
+              if (controller.plans.isEmpty) {
+                return _buildEmptyState();
+              }
+              
+              return _buildContent();
+            }
           ),
           // Payment processing overlay
           Obx(
@@ -809,6 +819,239 @@ class ClientSubscriptionScreen extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  // ═══════════════════════════════════════════════════
+  //  ACTIVE SUBSCRIPTION VIEW
+  // ═══════════════════════════════════════════════════
+  Widget _buildActiveSubscriptionView() {
+    final sub = controller.mySubscription.value!;
+    final plan = sub.plan;
+    
+    return CustomScrollView(
+      physics: const BouncingScrollPhysics(),
+      slivers: [
+        SliverAppBar(
+          backgroundColor: Colors.transparent,
+          surfaceTintColor: Colors.transparent,
+          elevation: 0,
+          pinned: true,
+          leading: _buildBackButton(),
+          centerTitle: true,
+          title: Text(
+            "My Subscription",
+            style: GoogleFonts.playfairDisplay(
+              fontSize: 18.sp,
+              fontWeight: FontWeight.w600,
+              color: _darkText,
+            ),
+          ),
+        ),
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 20.h),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Premium Card
+                Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [plan.primaryColor, plan.primaryColor.withOpacity(0.8)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(28.r),
+                    boxShadow: [
+                      BoxShadow(
+                        color: plan.primaryColor.withOpacity(0.3),
+                        blurRadius: 24,
+                        offset: const Offset(0, 10),
+                      ),
+                    ],
+                  ),
+                  padding: EdgeInsets.all(28.r),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  plan.name.toUpperCase(),
+                                  style: GoogleFonts.lato(
+                                    fontSize: 12.sp,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: 1.5,
+                                    color: Colors.white.withOpacity(0.9),
+                                  ),
+                                ),
+                                SizedBox(height: 8.h),
+                                Text(
+                                  "${plan.formattedPrice}${plan.formattedInterval}",
+                                  style: GoogleFonts.playfairDisplay(
+                                    fontSize: 28.sp,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Container(
+                            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(20.r),
+                            ),
+                            child: Text(
+                              sub.isTrialing ? "TRIAL ACTIVE" : "ACTIVE",
+                              style: GoogleFonts.lato(
+                                fontSize: 10.sp,
+                                fontWeight: FontWeight.bold,
+                                color: plan.primaryColor,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 30.h),
+                      Divider(color: Colors.white.withOpacity(0.3), height: 1),
+                      SizedBox(height: 20.h),
+                      
+                      // Dates
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "Started on",
+                                style: GoogleFonts.lato(
+                                  fontSize: 12.sp,
+                                  color: Colors.white.withOpacity(0.8),
+                                ),
+                              ),
+                              SizedBox(height: 4.h),
+                              Text(
+                                sub.formattedStartDate,
+                                style: GoogleFonts.lato(
+                                  fontSize: 14.sp,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Text(
+                                sub.cancelAtPeriodEnd ? "Ends on" : "Renews on",
+                                style: GoogleFonts.lato(
+                                  fontSize: 12.sp,
+                                  color: Colors.white.withOpacity(0.8),
+                                ),
+                              ),
+                              SizedBox(height: 4.h),
+                              Text(
+                                sub.formattedEndDate,
+                                style: GoogleFonts.lato(
+                                  fontSize: 14.sp,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                
+                SizedBox(height: 40.h),
+                
+                // Features Header
+                Text(
+                  "Included in your plan",
+                  style: GoogleFonts.playfairDisplay(
+                    fontSize: 20.sp,
+                    fontWeight: FontWeight.w600,
+                    color: _darkText,
+                  ),
+                ),
+                SizedBox(height: 20.h),
+                
+                // Features List
+                Container(
+                  padding: EdgeInsets.all(24.w),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20.r),
+                    border: Border.all(color: Colors.white.withOpacity(0.5)),
+                  ),
+                  child: Column(
+                    children: plan.features.map((feature) {
+                      return Padding(
+                        padding: EdgeInsets.only(bottom: 16.h),
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: EdgeInsets.all(4.w),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFFDE4EA),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                Icons.check_rounded,
+                                size: 14.sp,
+                                color: _accentPink,
+                              ),
+                            ),
+                            SizedBox(width: 16.w),
+                            Expanded(
+                              child: Text(
+                                feature,
+                                style: GoogleFonts.lato(
+                                  fontSize: 14.sp,
+                                  color: _darkText.withOpacity(0.8),
+                                  height: 1.4,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+                
+                SizedBox(height: 40.h),
+                
+                // Info footer
+                Center(
+                  child: Text(
+                    "Payments are managed securely by Stripe.",
+                    style: GoogleFonts.lato(
+                      fontSize: 12.sp,
+                      color: _subtleText,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

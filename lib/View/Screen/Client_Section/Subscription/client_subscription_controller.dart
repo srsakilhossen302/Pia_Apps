@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:get/get.dart';
+import '../../../../Model/Client_Section/my_subscription_model.dart';
 import '../../../../Model/Client_Section/subscription_model.dart';
 import '../../../../helper/shared_prefe/shared_prefe.dart';
 import '../../../../service/api_url.dart';
@@ -10,16 +11,47 @@ class ClientSubscriptionController extends GetxController {
   var isLoading = false.obs;
   var isProcessingPayment = false.obs;
   var plans = <SubscriptionPlanModel>[].obs;
+  var mySubscription = Rxn<MySubscriptionModel>(); // Holds active subscription if it exists
 
   @override
   void onInit() {
     super.onInit();
-    getSubscriptionPlans();
+    _loadSubscriptionData();
+  }
+
+  Future<void> _loadSubscriptionData() async {
+    isLoading.value = true;
+    await _getMySubscription();
+    // If user has no active subscription or their subscription is expired, fetch plans so they can subscribe again.
+    if (mySubscription.value == null || !mySubscription.value!.isActive) {
+      await getSubscriptionPlans(showLoading: false);
+    }
+    isLoading.value = false;
+  }
+
+  // ─── Fetch My Active Subscription ───────────────
+  Future<void> _getMySubscription() async {
+    try {
+      final token = await SharePrefsHelper.getString(SharedPreferenceValue.token);
+      final response = await GetConnect().get(
+        "${ApiConstant.baseUrl}${ApiConstant.mySubscription}",
+        headers: {'Authorization': 'Bearer $token'},
+      );
+
+      if (response.statusCode == 200 && response.body['data'] != null) {
+        final data = response.body['data'];
+        mySubscription.value = MySubscriptionModel.fromJson(data);
+      } else {
+        mySubscription.value = null; // No subscription
+      }
+    } catch (e) {
+      debugPrint("My Subscription Load Error: $e");
+    }
   }
 
   // ─── Step 1: Fetch available subscription plans ───────────────
-  Future<void> getSubscriptionPlans() async {
-    isLoading.value = true;
+  Future<void> getSubscriptionPlans({bool showLoading = true}) async {
+    if (showLoading) isLoading.value = true;
     try {
       final token =
           await SharePrefsHelper.getString(SharedPreferenceValue.token);

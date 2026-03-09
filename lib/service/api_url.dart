@@ -22,4 +22,5 @@ class ApiConstant {
   static const String subscriptionPlans = "$apiVersion/subscription/plans";
   static const String subscriptionCreate = "$apiVersion/subscription/create";
   static const String subscriptionStatus = "$apiVersion/subscription/status";
+  static const String mySubscription = "$apiVersion/subscription/my-subscription";
 }
