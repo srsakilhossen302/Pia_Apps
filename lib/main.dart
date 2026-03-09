@@ -1,13 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:get/get.dart';
 import 'View/Screen/SplashScreen/splash_screen.dart';
 
 import 'Core/AppRoute/app_route.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // ── Stripe Setup ──
+  Stripe.publishableKey = 'pk_test_YOUR_STRIPE_PUBLISHABLE_KEY'; // TODO: Replace with your actual Stripe publishable key
+  await Stripe.instance.applySettings();
+
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
   ]);

@@ -1,0 +1,95 @@
+# Flutter Subscription Integration Guide (Stripe SDK)
+This guide will help you connect the Flutter app with the Ascela backend for a seamless subscription flow.
+ 
+### 1. Required Packages (Dependencies)
+Add the following package to your pubspec.yaml file:
+ 
+```
+dependencies:
+  flutter_stripe: ^10.1.1 # Use the latest version
+```
+### 2. Initial Setup (Main.dart)
+Configure Stripe with your Stripe Publishable Key in the main.dart file:
+ 
+```
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  Stripe.publishableKey = 
+  "YOUR_STRIPE_PUBLISHABLE_KEY";
+  await Stripe.instance.applySettings();
+  runApp(const MyApp());
+}
+```
+### 3. Subscription Flow (Step-by-Step) Step 1: Create Subscription (API Call)
+When a user selects a plan, call the backend's create endpoint. It will return a clientSecret .
+ 
+- Endpoint: POST /api/v1/subscription/create
+- Request Body: { "planId": "SELECTED_PLAN_ID" }
+```
+Future<Map<String, dynamic>> createSubscription
+(String planId) async {
+  final response = await http.post(
+    Uri.parse('$baseUrl/subscription/create'),
+    headers: {
+      'Authorization': 'Bearer $userToken',
+      'Content-Type': 'application/json',
+    },
+    body: jsonEncode({'planId': planId}),
+  );
+  return jsonDecode(response.body);
+}
+``` Step 2: Initialize & Present Payment Sheet
+Use the clientSecret received from the backend to set up the Stripe Payment Sheet.
+ 
+```
+Future<void> initAndPresentPaymentSheet(String 
+clientSecret) async {
+  try {
+    // 1. Initialize Payment Sheet
+    await Stripe.instance.initPaymentSheet(
+      paymentSheetParameters: 
+      SetupPaymentSheetParameters(
+        // IMPORTANT: 
+        // If clientSecret starts with 'seti_', use 
+        setupIntentClientSecret.
+        // If it starts with 'pi_', use 
+        paymentIntentClientSecret.
+        setupIntentClientSecret: clientSecret, 
+        merchantDisplayName: 'Ascela Health',
+        style: ThemeMode.light,
+      ),
+    );
+ 
+    // 2. Present Payment Sheet
+    await Stripe.instance.presentPaymentSheet();
+ 
+    // 3. Success! Show a message to the user
+    print("Payment Success!");
+  } catch (e) {
+    if (e is StripeException) {
+      print("Error from Stripe: ${e.error.
+      localizedMessage}");
+    } else {
+      print("Error: $e");
+    }
+  }
+}
+```
+### 4. Post-Payment Verification
+After the Payment Sheet closes, it might take a few seconds for the subscription status to update in the database (as it is processed via Webhooks ).
+ 
+Once the payment is successful, call the following endpoint to verify the user's active status:
+ 
+- Endpoint: GET /api/v1/subscription/status
+```
+
+```
+Future<bool> checkStatus() async {
+  final response = await http.get(
+    Uri.parse('$baseUrl/subscription/status'),
+    headers: {'Authorization': 'Bearer $userToken'},
+  );
+  final data = jsonDecode(response.body);
+  return data['data']['isActive']; // If true, the 
+  subscription is active
+}
