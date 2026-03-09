@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:get/get.dart';
@@ -70,17 +71,25 @@ class ClientSubscriptionController extends GetxController {
           await SharePrefsHelper.getString(SharedPreferenceValue.token);
 
       // Call backend to create subscription
-      final response = await GetConnect().post(
-        "${ApiConstant.baseUrl}${ApiConstant.subscriptionCreate}",
-        {'planId': plan.id},
+      final url = "${ApiConstant.baseUrl}${ApiConstant.subscriptionCreate}";
+      final bodyData = jsonEncode({'planId': plan.id});
+      
+      final connect = GetConnect();
+      connect.timeout = const Duration(seconds: 30); // Need more time for backend to talk to Stripe
+      
+      final response = await connect.post(
+        url,
+        bodyData,
         headers: {
           'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
         },
-        contentType: 'application/json',
       );
 
       debugPrint("=== Subscription Create Response ===");
+      debugPrint("URL: $url");
       debugPrint("Status: ${response.statusCode}");
+      debugPrint("StatusText: ${response.statusText}");
       debugPrint("Body: ${response.body}");
       debugPrint("====================================");
 

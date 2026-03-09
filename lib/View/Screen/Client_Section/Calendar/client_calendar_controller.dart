@@ -73,11 +73,11 @@ class ClientCalendarController extends GetxController {
     try {
       final token = await SharePrefsHelper.getString(SharedPreferenceValue.token);
       
-      // Format as d-MM-yyyy (e.g. 3-03-2026)
-      final dayStr = date.day;
+      // Format as MM-DD-YYYY (e.g. 03-14-2026)
+      final dayStr = date.day.toString().padLeft(2, '0');
       final monthStr = date.month.toString().padLeft(2, '0');
       final yearStr = date.year;
-      final formattedDate = "$dayStr-$monthStr-$yearStr";
+      final formattedDate = "$monthStr-$dayStr-$yearStr";
 
       final url = "${ApiConstant.baseUrl}${ApiConstant.cyclePhase}?date=$formattedDate";
 
