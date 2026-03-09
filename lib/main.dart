@@ -11,7 +11,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // ── Stripe Setup ──
-  Stripe.publishableKey = 'pk_test_YOUR_STRIPE_PUBLISHABLE_KEY'; // TODO: Replace with your actual Stripe publishable key
+  Stripe.publishableKey = 'pk_test_51RcvK8GdOsJASBMC9aDK1onP8kTVwAxve4385Mr09r2Edd1fxcbSWD1y5DCclahZ7MHa0hf1eBnsnq16bWavPRY400W2WfumAa'; // TODO: Replace with your actual Stripe publishable key
   await Stripe.instance.applySettings();
 
   SystemChrome.setPreferredOrientations([
