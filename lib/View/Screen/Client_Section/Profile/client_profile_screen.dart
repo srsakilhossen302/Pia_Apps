@@ -91,27 +91,6 @@ class ClientProfileScreen extends StatelessWidget {
                         ),
                       ),
                     ),
-                    Positioned(
-                      bottom: 5.h,
-                      right: 5.w,
-                      child: GestureDetector(
-                        onTap: () => controller.pickProfileImage(
-                          Icons.camera_alt as dynamic,
-                        ), // Just a placeholder for logic
-                        child: Container(
-                          padding: EdgeInsets.all(8.w),
-                          decoration: const BoxDecoration(
-                            color: Color(0xFFF48FB1),
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            Icons.camera_alt,
-                            color: Colors.white,
-                            size: 16.sp,
-                          ),
-                        ),
-                      ),
-                    ),
                   ],
                 ),
               ),
@@ -182,11 +161,13 @@ class ClientProfileScreen extends StatelessWidget {
                     _buildInfoItem(
                       icon: Icons.verified_user_outlined,
                       label: "SUBSCRIPTION STATUS",
-                      value: (user.subscriptionTier != null && user.subscriptionTier != 'free')
+                      value:
+                          (user.subscriptionTier != null &&
+                              user.subscriptionTier != 'free')
                           ? "${user.subscriptionTier![0].toUpperCase()}${user.subscriptionTier!.substring(1)} Plan"
                           : (user.trialUsed == false)
-                              ? "Free Plan (Trial Available)"
-                              : "Free Plan",
+                          ? "Free Plan (Trial Available)"
+                          : "Free Plan",
                       onTap: () =>
                           Get.toNamed(AppRoute.clientSubscriptionScreen),
                     ),

@@ -80,7 +80,9 @@ class ClientProfileController extends GetxController {
     isLoading.value = true;
     update();
     try {
-      final token = await SharePrefsHelper.getString(SharedPreferenceValue.token);
+      final token = await SharePrefsHelper.getString(
+        SharedPreferenceValue.token,
+      );
       final formData = FormData({
         'profile': MultipartFile(imagePath, filename: 'profile.jpg'),
       });
@@ -88,16 +90,16 @@ class ClientProfileController extends GetxController {
       final response = await GetConnect().patch(
         "${ApiConstant.baseUrl}${ApiConstant.userProfile}",
         formData,
-        headers: {
-          'Authorization': 'Bearer $token',
-        },
+        headers: {'Authorization': 'Bearer $token'},
       );
 
       if (response.statusCode == 200) {
         ToastHelper.showSuccess("Profile image updated successfully");
         await getUserProfile(); // Refresh profile
       } else {
-        ToastHelper.showError(response.body['message'] ?? "Failed to update profile image");
+        ToastHelper.showError(
+          response.body['message'] ?? "Failed to update profile image",
+        );
       }
     } catch (e) {
       ToastHelper.showError("Error updating profile image: $e");

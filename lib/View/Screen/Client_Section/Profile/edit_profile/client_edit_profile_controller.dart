@@ -75,8 +75,9 @@ class ClientEditProfileController extends GetxController {
   Future<void> saveChanges() async {
     isLoading.value = true;
     try {
-      final token =
-          await SharePrefsHelper.getString(SharedPreferenceValue.token);
+      final token = await SharePrefsHelper.getString(
+        SharedPreferenceValue.token,
+      );
       if (token == null || token.isEmpty) {
         ToastHelper.showError("Authentication token is missing.");
         return;
@@ -93,7 +94,10 @@ class ClientEditProfileController extends GetxController {
           List<String> parts = birthdayController.text.split('/');
           if (parts.length == 3) {
             DateTime dt = DateTime(
-                int.parse(parts[2]), int.parse(parts[0]), int.parse(parts[1]));
+              int.parse(parts[2]),
+              int.parse(parts[0]),
+              int.parse(parts[1]),
+            );
             dataMap["dateOfBirth"] = dt.toUtc().toIso8601String();
           }
         } catch (e) {
@@ -133,11 +137,15 @@ class ClientEditProfileController extends GetxController {
       debugPrint("Has Image: ${selectedImage.value != null}");
       debugPrint("======================================");
 
-      final response = await GetConnect().patch(
-        "${ApiConstant.baseUrl}${ApiConstant.userProfile}",
-        formData,
-        headers: {'Authorization': 'Bearer $token'},
-      ).timeout(const Duration(seconds: 45)); // Longer timeout for file upload
+      final response = await GetConnect()
+          .patch(
+            "${ApiConstant.baseUrl}${ApiConstant.userProfile}",
+            formData,
+            headers: {'Authorization': 'Bearer $token'},
+          )
+          .timeout(
+            const Duration(seconds: 45),
+          ); // Longer timeout for file upload
 
       debugPrint("==== UPDATE RESPONSE ====");
       debugPrint("Status Code: ${response.statusCode}");
@@ -145,16 +153,17 @@ class ClientEditProfileController extends GetxController {
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         ToastHelper.showSuccess(
-            response.body != null && response.body['message'] != null
-                ? response.body['message']
-                : "Profile updated successfully");
+          response.body != null && response.body['message'] != null
+              ? response.body['message']
+              : "Profile updated successfully",
+        );
         await profileController.getUserProfile();
         Get.back();
       } else {
         String errorMsg =
             response.body != null && response.body['message'] != null
-                ? response.body['message']
-                : "Failed to update profile";
+            ? response.body['message']
+            : "Failed to update profile";
         ToastHelper.showError("Error (${response.statusCode}): $errorMsg");
       }
     } catch (e) {
