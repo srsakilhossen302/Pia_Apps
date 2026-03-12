@@ -423,16 +423,31 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                         ),
                         SizedBox(height: 15.h),
                         ...currentRecipe.ingredients!.map((ingredient) {
-                          return Padding(
-                            padding: EdgeInsets.symmetric(vertical: 8.h),
+                          return Container(
+                            margin: EdgeInsets.only(bottom: 12.h),
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 16.w,
+                              vertical: 14.h,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFFFF9FA),
+                              borderRadius: BorderRadius.circular(16.r),
+                            ),
                             child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text(
-                                  ingredient.name ?? "",
-                                  style: GoogleFonts.lato(
-                                    fontSize: 14.sp,
-                                    color: Colors.black87,
+                                Icon(
+                                  Icons.add_circle_outline,
+                                  size: 20.sp,
+                                  color: const Color(0xFFFF8FA3),
+                                ),
+                                SizedBox(width: 12.w),
+                                Expanded(
+                                  child: Text(
+                                    ingredient.name ?? "",
+                                    style: GoogleFonts.lato(
+                                      fontSize: 14.sp,
+                                      color: const Color(0xFF333333),
+                                    ),
                                   ),
                                 ),
                                 Text(
@@ -440,7 +455,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                                   style: GoogleFonts.lato(
                                     fontSize: 14.sp,
                                     fontWeight: FontWeight.bold,
-                                    color: Colors.black87,
+                                    color: const Color(0xFF333333),
                                   ),
                                 ),
                               ],
