@@ -93,20 +93,7 @@ class ClientHomeScreen extends StatelessWidget {
                     bool isComplete = data.currentPhaseInfo?.isHealthSetupComplete == true;
 
                     if (isComplete) {
-                       EducationalContent? currentEdu;
-                       if (data.educationalContent != null && data.educationalContent!.isNotEmpty && data.currentPhaseInfo?.phase != null) {
-                         currentEdu = data.educationalContent!.firstWhere(
-                           (e) => e.phase?.toLowerCase() == data.currentPhaseInfo!.phase!.toLowerCase(),
-                           orElse: () => data.educationalContent!.first,
-                         );
-                       }
-                       return Column(
-                         children: [
-                           if (currentEdu != null) _buildEducationalCard(currentEdu),
-                           SizedBox(height: 25.h),
-                           _buildPhaseDetailsCard(controller),
-                         ],
-                       );
+                       return _buildPhaseDetailsCard(controller);
                     } else {
                        if (data.educationalContent == null || data.educationalContent!.isEmpty) {
                            return const SizedBox.shrink();
