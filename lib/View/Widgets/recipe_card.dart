@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -101,7 +102,7 @@ class RecipeCard extends StatelessWidget {
                       }).toList(),
                     ),
                   ),
-                // Top Right Action (Star)
+                // Top Right Action (Heart)
                 Positioned(
                   top: 15.h,
                   right: 15.w,
@@ -117,8 +118,8 @@ class RecipeCard extends StatelessWidget {
                       child: Center(
                         child: Icon(
                           (recipe.isFavorite == true || isFavoritePage)
-                              ? Icons.star
-                              : Icons.star_border,
+                              ? CupertinoIcons.heart_fill
+                              : CupertinoIcons.heart,
                           size: 18.sp,
                           color: (recipe.isFavorite == true || isFavoritePage)
                               ? const Color(0xFFFF8FA3)

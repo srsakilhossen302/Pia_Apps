@@ -432,8 +432,8 @@ class ClientHomeScreen extends StatelessWidget {
                       ),
                       child: Icon(
                         (recipe.isFavorite ?? false)
-                            ? Icons.star
-                            : Icons.star_border,
+                            ? CupertinoIcons.heart_fill
+                            : CupertinoIcons.heart,
                         color: (recipe.isFavorite ?? false)
                             ? const Color(0xFFFF8FA3)
                             : Colors.black87,
