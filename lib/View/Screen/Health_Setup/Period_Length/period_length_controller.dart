@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:get/get.dart';
 import '../../../../helper/shared_prefe/shared_prefe.dart';
@@ -9,6 +10,35 @@ import '../../Health_Setup/Cycle_Length/cycle_length_screen.dart';
 class PeriodLengthController extends GetxController {
   var selectedDays = 5.obs; // Default to 5 days
   var isLoading = false.obs;
+  var rangeLabel = "".obs;
+  var averageLabel = "".obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+    fetchPeriodMetadata();
+  }
+
+  Future<void> fetchPeriodMetadata() async {
+    try {
+      final token = await SharePrefsHelper.getString(SharedPreferenceValue.token);
+      final response = await GetConnect().get(
+        "${ApiConstant.baseUrl}${ApiConstant.cycleMetadata}",
+        headers: {'Authorization': 'Bearer $token'},
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.body['data'];
+        if (data != null && data['periodLength'] != null) {
+          rangeLabel.value = data['periodLength']['rangeLabel'] ?? "";
+          averageLabel.value = data['periodLength']['averageLabel'] ?? "";
+          selectedDays.value = data['periodLength']['defaultValue'] ?? 5;
+        }
+      }
+    } catch (e) {
+      debugPrint("Error fetching metadata: $e");
+    }
+  }
 
   // List of days from 1 to 31
   final List<int> days = List.generate(31, (index) => index + 1);

@@ -193,6 +193,38 @@ class CycleLengthScreen extends StatelessWidget {
                 ),
               ),
 
+              // rangeLabel and averageLabel from API
+              Obx(() {
+                if (controller.rangeLabel.value.isEmpty && controller.averageLabel.value.isEmpty) {
+                  return const SizedBox.shrink();
+                }
+                return Column(
+                  children: [
+                    if (controller.rangeLabel.value.isNotEmpty)
+                      Text(
+                        controller.rangeLabel.value,
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.poppins(
+                          fontSize: 14.sp,
+                          color: const Color(0xFFF09AB1),
+                        ),
+                      ),
+                    if (controller.rangeLabel.value.isNotEmpty && controller.averageLabel.value.isNotEmpty)
+                      SizedBox(height: 10.h),
+                    if (controller.averageLabel.value.isNotEmpty)
+                      Text(
+                        controller.averageLabel.value,
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.poppins(
+                          fontSize: 14.sp,
+                          color: const Color(0xFFF09AB1),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                  ],
+                );
+              }),
+
               SizedBox(height: 30.h),
 
               // Bottom Buttons (Back & Continue)
