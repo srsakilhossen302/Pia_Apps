@@ -1,6 +1,6 @@
 class ApiConstant {
-  static const String baseUrl = 'http://195.35.6.13:4007';  //live server
-  // static const String baseUrl = 'http://10.10.7.50:4007';
+  // static const String baseUrl = 'http://195.35.6.13:4007';  //live server
+  static const String baseUrl = 'http://10.10.7.50:4007';
   static const String apiVersion = "/api/v1";
   static const String socketUrl = baseUrl;
 
@@ -19,8 +19,10 @@ class ApiConstant {
   static const String cycleCalendar = "$apiVersion/cycle/calendar";
   static const String cyclePhase = "$apiVersion/cycle/phase";
   static const String grocery = "$apiVersion/grocery";
+  static const String addRecipeIngredients = "$grocery/add-recipe-ingredients";
   static const String subscriptionPlans = "$apiVersion/subscription/plans";
   static const String subscriptionCreate = "$apiVersion/subscription/create";
   static const String subscriptionStatus = "$apiVersion/subscription/status";
-  static const String mySubscription = "$apiVersion/subscription/my-subscription";
+  static const String mySubscription =
+      "$apiVersion/subscription/my-subscription";
 }

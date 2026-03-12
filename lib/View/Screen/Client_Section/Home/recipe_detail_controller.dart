@@ -239,4 +239,57 @@ class RecipeDetailController extends GetxController {
       debugPrint("Favorites sync error: $e");
     }
   }
+
+  Future<void> addToGrocery() async {
+    if (recipe.value == null || recipe.value?.id == null) {
+      ToastHelper.showError("Error: Recipe ID is missing");
+      return;
+    }
+
+    final String recipeId = recipe.value!.id!;
+    isLoading.value = true;
+    update();
+
+    try {
+      final token = await SharePrefsHelper.getString(
+        SharedPreferenceValue.token,
+      );
+
+      final url = "${ApiConstant.baseUrl}${ApiConstant.addRecipeIngredients}";
+
+      debugPrint("Hitting Add to Grocery API: $url");
+      debugPrint("Payload: {'recipeId': '$recipeId'}");
+
+      final response = await GetConnect().post(
+        url,
+        {'recipeId': recipeId},
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      debugPrint("Add to Grocery Response Status: ${response.statusCode}");
+      debugPrint("Add to Grocery Response Body: ${response.bodyString}");
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        ToastHelper.showSuccess("Added to Grocery list!");
+        print("API HIT SUCCESS: ${response.statusCode}");
+      } else {
+        String errorMsg = "Failed to add to grocery";
+        if (response.body is Map && response.body['message'] != null) {
+          errorMsg = response.body['message'];
+        }
+        ToastHelper.showError(errorMsg);
+        print("API HIT FAILED: ${response.statusCode}");
+      }
+    } catch (e) {
+      ToastHelper.showError("Connection error: $e");
+      debugPrint("Add to Grocery Exception: $e");
+      print("API HIT ERROR: $e");
+    } finally {
+      isLoading.value = false;
+      update();
+    }
+  }
 }
