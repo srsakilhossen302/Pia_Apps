@@ -435,10 +435,15 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                             ),
                             child: Row(
                               children: [
-                                Icon(
-                                  Icons.add_circle_outline,
-                                  size: 20.sp,
-                                  color: const Color(0xFFFF8FA3),
+                                GestureDetector(
+                                  onTap: () {
+                                    controller.addToGrocery();
+                                  },
+                                  child: Icon(
+                                    Icons.add_circle_outline,
+                                    size: 20.sp,
+                                    color: const Color(0xFFFF8FA3),
+                                  ),
                                 ),
                                 SizedBox(width: 12.w),
                                 Expanded(

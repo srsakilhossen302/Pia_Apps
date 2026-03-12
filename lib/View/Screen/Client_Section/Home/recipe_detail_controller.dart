@@ -1,3 +1,6 @@
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'dart:convert';
 import 'package:get/get.dart';
 import 'package:flutter/foundation.dart'; // For debugPrint
@@ -81,7 +84,10 @@ class RecipeDetailController extends GetxController {
         final homeController = Get.find<ClientHomeController>();
         if (homeController.cycleOverview.value?.recipes != null) {
           bool found = false;
-          homeController.cycleOverview.value!.recipes!.forEach((category, list) {
+          homeController.cycleOverview.value!.recipes!.forEach((
+            category,
+            list,
+          ) {
             final index = list.indexWhere(
               (element) => element.id == recipe.value!.id,
             );
@@ -219,7 +225,8 @@ class RecipeDetailController extends GetxController {
 
   void _syncWithFavoritesController() {
     try {
-      if (Get.isRegistered<ClientFavoritesController>() && recipe.value != null) {
+      if (Get.isRegistered<ClientFavoritesController>() &&
+          recipe.value != null) {
         final favController = Get.find<ClientFavoritesController>();
         final recipeId = recipe.value!.id;
         final isFav = recipe.value!.isFavorite ?? false;
@@ -229,7 +236,9 @@ class RecipeDetailController extends GetxController {
           favController.favoriteMeals.removeWhere((r) => r.id == recipeId);
         } else {
           // Add back if not already in list
-          final exists = favController.favoriteMeals.any((r) => r.id == recipeId);
+          final exists = favController.favoriteMeals.any(
+            (r) => r.id == recipeId,
+          );
           if (!exists && recipe.value != null) {
             favController.favoriteMeals.insert(0, recipe.value!);
           }
@@ -240,13 +249,9 @@ class RecipeDetailController extends GetxController {
     }
   }
 
-  Future<void> addToGrocery() async {
-    if (recipe.value == null || recipe.value?.id == null) {
-      ToastHelper.showError("Error: Recipe ID is missing");
-      return;
-    }
+  var selectedListId = "".obs;
 
-    final String recipeId = recipe.value!.id!;
+  Future<void> addToGrocery() async {
     isLoading.value = true;
     update();
 
@@ -255,41 +260,178 @@ class RecipeDetailController extends GetxController {
         SharedPreferenceValue.token,
       );
 
-      final url = "${ApiConstant.baseUrl}${ApiConstant.addRecipeIngredients}";
+      // Fetching all grocery lists (GET /api/v1/grocery)
+      final url = "${ApiConstant.baseUrl}${ApiConstant.grocery}";
+      debugPrint("Fetching Grocery Lists for selection: $url");
 
-      debugPrint("Hitting Add to Grocery API: $url");
-      debugPrint("Payload: {'recipeId': '$recipeId'}");
-
-      final response = await GetConnect().post(
+      final response = await GetConnect().get(
         url,
-        {'recipeId': recipeId},
         headers: {
           'Content-Type': 'application/json; charset=UTF-8',
           'Authorization': 'Bearer $token',
         },
       );
 
-      debugPrint("Add to Grocery Response Status: ${response.statusCode}");
-      debugPrint("Add to Grocery Response Body: ${response.bodyString}");
-
       if (response.statusCode == 200 || response.statusCode == 201) {
-        ToastHelper.showSuccess("Added to Grocery list!");
-        print("API HIT SUCCESS: ${response.statusCode}");
+        dynamic responseData = response.body['data'];
+        _showListSelectionPopup(responseData);
       } else {
-        String errorMsg = "Failed to add to grocery";
-        if (response.body is Map && response.body['message'] != null) {
-          errorMsg = response.body['message'];
-        }
-        ToastHelper.showError(errorMsg);
-        print("API HIT FAILED: ${response.statusCode}");
+        ToastHelper.showError("Failed to fetch grocery lists");
+        debugPrint("Fetch error: ${response.statusCode}");
       }
     } catch (e) {
       ToastHelper.showError("Connection error: $e");
-      debugPrint("Add to Grocery Exception: $e");
-      print("API HIT ERROR: $e");
+      debugPrint("Exception: $e");
     } finally {
       isLoading.value = false;
       update();
     }
+  }
+
+  void _showListSelectionPopup(dynamic data) {
+    selectedListId.value = ""; // Reset selection when opening
+    
+    Get.dialog(
+      Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24.r)),
+        backgroundColor: Colors.white,
+        child: Padding(
+          padding: EdgeInsets.all(20.w),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                "Select Grocery List",
+                style: GoogleFonts.playfairDisplay(
+                  fontSize: 20.sp,
+                  fontWeight: FontWeight.bold,
+                  color: const Color(0xFF2D2D2D),
+                ),
+              ),
+              SizedBox(height: 10.h),
+              Text(
+                "Which list would you like to add these ingredients to?",
+                textAlign: TextAlign.center,
+                style: GoogleFonts.lato(
+                  fontSize: 13.sp,
+                  color: Colors.grey[600],
+                ),
+              ),
+              SizedBox(height: 20.h),
+              
+              if (data != null && data is List) ...[
+                ConstrainedBox(
+                  constraints: BoxConstraints(maxHeight: 300.h),
+                  child: Obx(() {
+                    // Accessing the observable at the top to prevent "Improper use of GetX" error
+                    final currentSelectedId = selectedListId.value; 
+                    
+                    return ListView.separated(
+                      shrinkWrap: true,
+                      itemCount: data.length,
+                      separatorBuilder: (context, index) => SizedBox(height: 10.h),
+                      itemBuilder: (context, index) {
+                        final list = data[index];
+                        final bool isSelected = currentSelectedId == list['_id'];
+                        
+                        return GestureDetector(
+                          onTap: () {
+                            selectedListId.value = list['_id'] ?? "";
+                          },
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+                            decoration: BoxDecoration(
+                              color: isSelected ? const Color(0xFFFF8FA3).withOpacity(0.12) : const Color(0xFFFFF9FA),
+                              borderRadius: BorderRadius.circular(15.r),
+                              border: Border.all(
+                                color: isSelected ? const Color(0xFFFF8FA3) : const Color(0xFFFFE4E8),
+                                width: isSelected ? 1.8 : 1,
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  isSelected ? Icons.check_circle : Icons.radio_button_off,
+                                  size: 22.sp,
+                                  color: const Color(0xFFFF8FA3),
+                                ),
+                                SizedBox(width: 12.w),
+                                Expanded(
+                                  child: Text(
+                                    list['title'] ?? "Untitled List",
+                                    style: GoogleFonts.lato(
+                                      fontSize: 14.sp,
+                                      fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                                      color: isSelected ? const Color(0xFFFF8FA3) : const Color(0xFF444444),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    );
+                  }),
+                ),
+              ] else ...[
+                Padding(
+                  padding: EdgeInsets.symmetric(vertical: 20.h),
+                  child: Text("No lists found", style: GoogleFonts.lato(color: Colors.grey)),
+                ),
+              ],
+              
+              SizedBox(height: 25.h),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Get.back(),
+                      style: OutlinedButton.styleFrom(
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+                        padding: EdgeInsets.symmetric(vertical: 14.h),
+                        side: const BorderSide(color: Color(0xFFFF8FA3)),
+                      ),
+                      child: Text(
+                        "Cancel",
+                        style: GoogleFonts.lato(
+                          color: const Color(0xFFFF8FA3),
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 12.w),
+                  Expanded(
+                    child: Obx(() => ElevatedButton(
+                      onPressed: selectedListId.value.isEmpty ? null : () {
+                        // User requested only selection logic for now
+                        Get.back();
+                        ToastHelper.showSuccess("List Selected: ${selectedListId.value}");
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFFF8FA3),
+                        disabledBackgroundColor: Colors.grey[300],
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+                        padding: EdgeInsets.symmetric(vertical: 14.h),
+                      ),
+                      child: Text(
+                        "Add Grocery",
+                        style: GoogleFonts.lato(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    )),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+      barrierDismissible: true,
+    );
   }
 }
