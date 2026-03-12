@@ -55,7 +55,7 @@ class ClientNavBar extends StatelessWidget {
                 controller,
               ),
               _navItem(Icons.search, "Search", 2, controller),
-              _navItem(Icons.star_border, "Favorites", 3, controller),
+              _navItem(Icons.favorite_border, "Favorites", 3, controller),
               _navItem(Icons.shopping_cart_outlined, "Grocery", 4, controller),
             ],
           ),
