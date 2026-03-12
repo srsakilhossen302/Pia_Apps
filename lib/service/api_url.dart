@@ -1,6 +1,6 @@
 class ApiConstant {
-  // static const String baseUrl = 'http://195.35.6.13:4007';  //live server
-  static const String baseUrl = 'http://10.10.7.50:4007';
+  static const String baseUrl = 'http://195.35.6.13:4007';  //live server
+  // static const String baseUrl = 'http://10.10.7.50:4007';
   static const String apiVersion = "/api/v1";
   static const String socketUrl = baseUrl;
 
