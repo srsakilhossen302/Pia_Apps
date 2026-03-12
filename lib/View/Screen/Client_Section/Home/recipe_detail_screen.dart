@@ -388,7 +388,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                             ),
                             GestureDetector(
                               onTap: () {
-                                controller.addToGrocery();
+                                controller.addToGrocery("Recipe Ingredients");
                               },
                               child: Container(
                                 padding: EdgeInsets.symmetric(
@@ -437,7 +437,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                               children: [
                                 GestureDetector(
                                   onTap: () {
-                                    controller.addToGrocery();
+                                    controller.addToGrocery(ingredient.name ?? "");
                                   },
                                   child: Icon(
                                     Icons.add_circle_outline,

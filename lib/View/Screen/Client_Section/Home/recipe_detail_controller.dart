@@ -250,8 +250,10 @@ class RecipeDetailController extends GetxController {
   }
 
   var selectedListId = "".obs;
+  String tempIngredientName = ""; // To store the clicked ingredient name
 
-  Future<void> addToGrocery() async {
+  Future<void> addToGrocery(String ingredientName) async {
+    tempIngredientName = ingredientName;
     isLoading.value = true;
     update();
 
@@ -406,9 +408,7 @@ class RecipeDetailController extends GetxController {
                   Expanded(
                     child: Obx(() => ElevatedButton(
                       onPressed: selectedListId.value.isEmpty ? null : () {
-                        // User requested only selection logic for now
-                        Get.back();
-                        ToastHelper.showSuccess("List Selected: ${selectedListId.value}");
+                        addIngredientToList(selectedListId.value);
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFFFF8FA3),
@@ -433,5 +433,43 @@ class RecipeDetailController extends GetxController {
       ),
       barrierDismissible: true,
     );
+  }
+
+  Future<void> addIngredientToList(String groceryId) async {
+    isLoading.value = true;
+    update();
+    Get.back(); // Close selection popup
+
+    try {
+      final token = await SharePrefsHelper.getString(
+        SharedPreferenceValue.token,
+      );
+
+      // Final API call: POST /api/v1/grocery/{groceryId}/items
+      final url = "${ApiConstant.baseUrl}${ApiConstant.grocery}/$groceryId/items";
+      debugPrint("Adding Item to List: $url");
+      debugPrint("Payload: {'name': '$tempIngredientName'}");
+
+      final response = await GetConnect().post(
+        url,
+        {"name": tempIngredientName},
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        ToastHelper.showSuccess("Added $tempIngredientName to list!");
+      } else {
+        ToastHelper.showError("Failed to add item");
+        debugPrint("Add Item error: ${response.statusCode} - ${response.bodyString}");
+      }
+    } catch (e) {
+      ToastHelper.showError("Connection error: $e");
+    } finally {
+      isLoading.value = false;
+      update();
+    }
   }
 }
