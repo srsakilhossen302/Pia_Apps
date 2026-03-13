@@ -137,9 +137,8 @@ class PhaseCardShimmer extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────
 // PHASE DETAILS CARD SHIMMER
-// ─────────────────────────────────────────
+
 class PhaseDetailsShimmer extends StatelessWidget {
   const PhaseDetailsShimmer({super.key});
 
